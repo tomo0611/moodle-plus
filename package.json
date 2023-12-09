@@ -1,6 +1,6 @@
 {
   "name": "moodle-plus",
-  "version": "0.0.1",
+  "version": "0.1b",
   "description": "Moodleにちょっとした機能を追加します!",
   "main": "./src/content_script.js",
   "scripts": {

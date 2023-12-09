@@ -37,7 +37,7 @@ function changeTitle() {
         if (title) {
             title.innerHTML = "む～どるぷらす (Moodle Plus)";
             const subtitle = document.createElement("p");
-            subtitle.innerHTML = `Developed by tomo0611 (大阪公立大学 工学部 情報工)</br>
+            subtitle.innerHTML = `Developed by <a href="https://tomo0611.jp/" target="_blank">tomo0611</a> (大阪公立大学 工学部 情報工)</br>
             バグなどの報告は<a href="https://github.com/tomo0611/moodle-plus" target="_blank">こちら</a>までお願いします。`;
             title.parentElement?.insertBefore(subtitle, title.nextElementSibling);
         }

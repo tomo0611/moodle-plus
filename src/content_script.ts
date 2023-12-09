@@ -45,13 +45,17 @@ function changeTitle() {
 /** サイトニュースを最小化 */
 function minimizeNewsFeed() {
     try {
-        const newsFeeds = document.getElementById("site-news-forum")?.getElementsByClassName('d-flex body-content-container');
-        if (newsFeeds) {
-            for (let i = 0; i < newsFeeds.length; i++) {
-                newsFeeds[i].innerHTML
-                    = newsFeeds[i].getElementsByClassName("link text-right")[0].outerHTML;
-            }
+        const title = document.getElementById("site-news-forum")?.getElementsByTagName("h2")[0];
+        if (title) {
+            // add element after title
+            const newNode = document.createElement("h4");
+            newNode.innerHTML = `話長いから中身しまったわよ`;
+            title.parentElement?.insertBefore(newNode, title.nextElementSibling);
         }
+        const lastlink = document.getElementById("site-news-forum")?.lastElementChild?.lastElementChild as HTMLAnchorElement;
+        lastlink.innerHTML = "あんた、こんな長い話見ようとしてるの？暇人？？</br>まあどうしてもっていうならクリックしなさい";
+        document.getElementById("site-news-forum")?.lastElementChild?.remove();
+        document.getElementById("site-news-forum")?.appendChild(lastlink as Node);
     } catch (e) {
         console.log("[Moodle Plus] News Feed Format is not as expected");
         console.log(e);
@@ -129,11 +133,16 @@ async function showUpcomingAsignments() {
     try {
         const newNode = document.createElement("span");
         newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
+        newNode.innerHTML += `<a href="/calendar/view.php?view=upcoming">もっと見る</a>`;
         newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
+
+        // 期限の近い課題を取得
         const upcoming_data = await (await fetch("/calendar/view.php?view=upcoming")).text();
         const parser = new DOMParser();
         const htmlDoc = parser.parseFromString(upcoming_data, 'text/html');
+        // 課題一覧
         const events = htmlDoc.getElementsByClassName('eventlist my-1')[0].getElementsByClassName("event mt-3");
+        // 最大4件に絞る
         const length = events.length > 4 ? 4 : events.length;
         for (let i = 0; i < length; i++) {
             const event = events[i];

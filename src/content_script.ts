@@ -91,62 +91,67 @@ const lefttime_list: number[] = [];
  * 残り時間を表示します。
  */
 function showTime() {
-
-    // 現在時刻を表示
-    let date = new Date();
-    let time = dateToString(date, false);
-    const realtime_clock = document.getElementById("realtime_clock");
-    if (realtime_clock) {
-        realtime_clock.innerText = time;
-        realtime_clock.textContent = time;
-    }
-
-
-    for (let i = 0; i < lefttime_list.length; i++) {
-        const lefttime = lefttime_list[i];
-        const lefttime_span = document.getElementsByClassName("left_realtime_clock")[i] as HTMLSpanElement;
-        const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9);
-        let lefttime_time = dateToString(lefttime_date, true);
-        if (lefttime_date.getDate() - 1 === 0) {
-            lefttime_span.style.color = "red";
-            lefttime_span.style.fontWeight = "bold";
-            lefttime_span.style.fontSize = "1.8em";
+    try {
+        // 現在時刻を表示
+        let date = new Date();
+        let time = dateToString(date, false);
+        const realtime_clock = document.getElementById("realtime_clock");
+        if (realtime_clock) {
+            realtime_clock.innerText = time;
+            realtime_clock.textContent = time;
         }
-        lefttime_span.innerText = lefttime_time;
-        lefttime_span.textContent = lefttime_time;
-    }
 
-    // 1秒後にまた実行
-    setTimeout(showTime, 1000);
+
+        for (let i = 0; i < lefttime_list.length; i++) {
+            const lefttime = lefttime_list[i];
+            const lefttime_span = document.getElementsByClassName("left_realtime_clock")[i] as HTMLSpanElement;
+            const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9);
+            let lefttime_time = dateToString(lefttime_date, true);
+            if (lefttime_date.getDate() - 1 === 0) {
+                lefttime_span.style.color = "red";
+                lefttime_span.style.fontWeight = "bold";
+                lefttime_span.style.fontSize = "1.8em";
+            }
+            lefttime_span.innerText = lefttime_time;
+            lefttime_span.textContent = lefttime_time;
+        }
+
+        // 1秒後にまた実行
+        setTimeout(showTime, 1000);
+    } catch (e) {
+        console.log("[Moodle Plus] Failed to show time");
+        console.log(e);
+    }
 }
 
 /** 期限の近い課題を表示 */
 async function showUpcomingAsignments() {
-    const newNode = document.createElement("span");
-    newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
-    newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
-    const upcoming_data = await (await fetch("/calendar/view.php?view=upcoming")).text();
-    const parser = new DOMParser();
-    const htmlDoc = parser.parseFromString(upcoming_data, 'text/html');
-    const events = htmlDoc.getElementsByClassName('eventlist my-1')[0].getElementsByClassName("event mt-3");
-    const length = events.length > 4 ? 4 : events.length;
-    for (let i = 0; i < length; i++) {
-        const event = events[i];
-        const event_title = (event.getElementsByClassName('name d-inline-block')[0] as HTMLHeadingElement).innerText;
+    try {
+        const newNode = document.createElement("span");
+        newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
+        newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
+        const upcoming_data = await (await fetch("/calendar/view.php?view=upcoming")).text();
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(upcoming_data, 'text/html');
+        const events = htmlDoc.getElementsByClassName('eventlist my-1')[0].getElementsByClassName("event mt-3");
+        const length = events.length > 4 ? 4 : events.length;
+        for (let i = 0; i < length; i++) {
+            const event = events[i];
+            const event_title = (event.getElementsByClassName('name d-inline-block')[0] as HTMLHeadingElement).innerText;
 
-        // 期間の開始を除外
-        if (event_title.indexOf("可能期間の開始") !== -1) continue;
+            // 期間の開始を除外
+            if (event_title.indexOf("可能期間の開始") !== -1) continue;
 
-        const cardBody = event.getElementsByClassName('description card-body')[0];
-        const event_unixtime = parseInt(cardBody.getElementsByClassName('col-11')[0].getElementsByTagName("a")[0].href.split("&time=")[1]);
-        lefttime_list.push(event_unixtime);
-        const event_date = (cardBody.getElementsByClassName('col-11')[0] as HTMLAnchorElement).innerText;
-        let event_url = (event.getElementsByClassName('card-link')[0] as HTMLAnchorElement).href;
-        if (event_url.indexOf("&action=") !== -1) {
-            event_url = event_url.split("&action=")[0];
-        }
-        const event_course = (event.getElementsByClassName('col-11')[event.getElementsByClassName('col-11').length - 1] as HTMLAnchorElement).innerText;
-        newNode.innerHTML += `
+            const cardBody = event.getElementsByClassName('description card-body')[0];
+            const event_unixtime = parseInt(cardBody.getElementsByClassName('col-11')[0].getElementsByTagName("a")[0].href.split("&time=")[1]);
+            lefttime_list.push(event_unixtime);
+            const event_date = (cardBody.getElementsByClassName('col-11')[0] as HTMLAnchorElement).innerText;
+            let event_url = (event.getElementsByClassName('card-link')[0] as HTMLAnchorElement).href;
+            if (event_url.indexOf("&action=") !== -1) {
+                event_url = event_url.split("&action=")[0];
+            }
+            const event_course = (event.getElementsByClassName('col-11')[event.getElementsByClassName('col-11').length - 1] as HTMLAnchorElement).innerText;
+            newNode.innerHTML += `
         <div class="card my-2">
             <div class="card-body">
                 <h6 class="card-subtitle">${event_course}</h6>
@@ -159,9 +164,12 @@ async function showUpcomingAsignments() {
             </div>
         </div>
         `;
+        }
+        document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
+
+        showTime();
+    } catch (e) {
+        console.log("[Moodle Plus] Failed to show upcoming assignments");
+        console.log(e);
     }
-    document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
-
-    showTime();
-
 }

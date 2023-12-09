@@ -105,7 +105,7 @@ function showTime() {
     for (let i = 0; i < lefttime_list.length; i++) {
         const lefttime = lefttime_list[i];
         const lefttime_span = document.getElementsByClassName("left_realtime_clock")[i] as HTMLSpanElement;
-        const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9 - 1000 * 3600 * 24 * 1); // 
+        const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9);
         let lefttime_time = dateToString(lefttime_date, true);
         if (lefttime_date.getDate() - 1 === 0) {
             lefttime_span.style.color = "red";

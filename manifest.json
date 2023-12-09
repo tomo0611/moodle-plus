@@ -4,6 +4,11 @@
     "manifest_version": 3,
     "description": "Moodleにちょっとした機能を追加します!",
     "author": "tomo0611@hotmail.com",
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "moodleplus"
+        }
+    },
     "content_scripts": [
         {
             "matches": [

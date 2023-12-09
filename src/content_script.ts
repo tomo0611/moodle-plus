@@ -16,7 +16,12 @@ window.onload = function () {
  * @return {boolean} ログインしているかどうか
  */
 function isLoggedin() {
-    return document.getElementsByClassName("usermenu")[0].children[0].className.indexOf("login") === -1;
+    try {
+        return document.getElementsByClassName("usermenu")[0].children[0].className.indexOf("login") === -1;
+    } catch (e) {
+        // 九州大学のログインページ対策
+        return false;
+    }
 }
 
 

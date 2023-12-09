@@ -1,0 +1,28 @@
+{
+  "name": "moodle-plus",
+  "version": "0.0.1",
+  "description": "Moodleにちょっとした機能を追加します!",
+  "main": "./src/content_script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomo0611/moodle-plus.git"
+  },
+  "keywords": [
+    "moodle",
+    "lms"
+  ],
+  "author": "tomo0611 <tomo0611@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tomo0611/moodle-plus/issues"
+  },
+  "homepage": "https://github.com/tomo0611/moodle-plus#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "typescript": "^5.3.3"
+  }
+}

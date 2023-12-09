@@ -1,0 +1,17 @@
+{
+    "name": "Moodle Plus",
+    "version": "0.0.1",
+    "manifest_version": 3,
+    "description": "Moodleにちょっとした機能を追加します!",
+    "content_scripts": [
+        {
+            "matches": [
+                "https://lms.omu.ac.jp/*",
+                "https://moodle.s.kyushu-u.ac.jp/*"
+            ],
+            "js": [
+                "./dist/content_script.js"
+            ]
+        }
+    ]
+}

@@ -11,6 +11,9 @@
             ],
             "js": [
                 "./dist/content_script.js"
+            ],
+            "css": [
+                "./styles/main.css"
             ]
         }
     ],

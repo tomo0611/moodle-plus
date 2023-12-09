@@ -1,0 +1,16 @@
+
+/* 授業名を大きくする */
+.coursebox>.info>.coursename {
+    font-size: 1.8em !important;
+    font-weight: bold !important;
+}
+
+/* primaryボタンを太字にする */
+.btn-primary {
+    font-weight: bold !important;
+}
+
+/* 背景色を変更 */
+#page-wrapper #page {
+    background-color: #acded4 !important;
+}

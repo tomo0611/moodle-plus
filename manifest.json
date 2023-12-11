@@ -1,12 +1,12 @@
 {
     "name": "Moodle Plus",
-    "version": "0.0.1",
+    "version": "0.1",
     "manifest_version": 3,
     "description": "Moodleにちょっとした機能を追加します!",
     "author": "tomo0611@hotmail.com",
     "browser_specific_settings": {
         "gecko": {
-            "id": "moodleplus"
+            "id": "moodleplus@tomo0611"
         }
     },
     "content_scripts": [

@@ -1,14 +1,12 @@
 // スクリプトが読み込まれた時の処理
-window.onload = function () {
-    console.log("[Moodle Plus] content script script loaded");
-    console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());
+console.log("[Moodle Plus] content script script loaded");
+console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());
 
-    if (window.location.pathname === "/" && isLoggedin()) {
-        changeTitle();
-        minimizeNewsFeed();
-        showUpcomingAsignments();
-    }
-};
+if (window.location.pathname === "/" && isLoggedin()) {
+    changeTitle();
+    minimizeNewsFeed();
+    showUpcomingAsignments();
+}
 
 /**
  * 利用者がログインしているかどうかを返します。
@@ -52,15 +50,26 @@ function minimizeNewsFeed() {
     try {
         const title = document.getElementById("site-news-forum")?.getElementsByTagName("h2")[0];
         if (title) {
-            // add element after title
-            const newNode = document.createElement("h4");
-            newNode.innerHTML = `話長いから中身しまったわよ`;
-            title.parentElement?.insertBefore(newNode, title.nextElementSibling);
+            title.innerText = "サイトニュース (コンパクト版)";
         }
         const lastlink = document.getElementById("site-news-forum")?.lastElementChild?.lastElementChild as HTMLAnchorElement;
-        lastlink.innerHTML = "あんた、こんな長い話見ようとしてるの？暇人？？</br>まあどうしてもっていうならクリックしなさい";
+        const subscribeButton = document.getElementById("site-news-forum")?.getElementsByClassName("subscribelink")[0].children[0] as HTMLAnchorElement;
+        subscribeButton.innerText = "長いお知らせ達を読む";
+        subscribeButton.textContent = "長いお知らせ達を読む";
+        subscribeButton.href = lastlink.href;
+        const titles = document.getElementById("site-news-forum")?.getElementsByClassName("h6 font-weight-bold mb-0");
+        // create new element
+        const newNode = document.createElement("div");
+        newNode.innerHTML = `<h6>☆お知らせ (タイトルのみ)</h6>`;
+        if (titles) {
+            for (let i = 0; i < titles.length; i++) {
+                const title = titles[i] as HTMLAnchorElement;
+                newNode.innerHTML += title.innerText + "<br/>";
+            }
+        }
         document.getElementById("site-news-forum")?.lastElementChild?.remove();
-        document.getElementById("site-news-forum")?.appendChild(lastlink as Node);
+        // add element at lastElement of site-news-forum
+        document.getElementById("site-news-forum")?.appendChild(newNode);
     } catch (e) {
         console.log("[Moodle Plus] News Feed Format is not as expected");
         console.log(e);
@@ -138,11 +147,12 @@ async function showUpcomingAsignments() {
     try {
         const newNode = document.createElement("span");
         newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
-        newNode.innerHTML += `<a href="/calendar/view.php?view=upcoming">もっと見る</a>`;
         newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
+        newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
+        newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
 
         // 期限の近い課題を取得
-        const upcoming_data = await (await fetch("/calendar/view.php?view=upcoming")).text();
+        const upcoming_data = await (await fetch(`https://${window.location.host}/calendar/view.php?view=upcoming`)).text();
         const parser = new DOMParser();
         const htmlDoc = parser.parseFromString(upcoming_data, 'text/html');
         // 課題一覧

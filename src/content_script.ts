@@ -125,7 +125,15 @@ function showTime() {
             const lefttime_span = document.getElementsByClassName("left_realtime_clock")[i] as HTMLSpanElement;
             const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9);
             let lefttime_time = dateToString(lefttime_date, true);
-            if (lefttime_date.getDate() - 1 === 0) {
+            if (lefttime_date.getTime() < 0) {
+                const elapsed = new Date(date.getTime() - lefttime * 1000 - 1000 * 3600 * 9);
+                lefttime_time = `⚠️期限切れ⚠️ -${dateToString(elapsed,true)}`;
+                lefttime_span.style.color = "black";
+                lefttime_span.style.backgroundColor = "yellow";
+                lefttime_span.style.padding = "4px";
+                lefttime_span.style.borderRadius = "3px";
+                lefttime_span.style.margin = "5px";
+            } else  if (lefttime_date.getDate() - 1 === 0) {
                 lefttime_span.style.color = "red";
                 lefttime_span.style.fontWeight = "bold";
                 lefttime_span.style.fontSize = "1.8em";

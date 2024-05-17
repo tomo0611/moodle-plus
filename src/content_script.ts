@@ -167,13 +167,18 @@ async function showUpcomingAsignments() {
         const events = htmlDoc.getElementsByClassName('eventlist my-1')[0].getElementsByClassName("event mt-3");
         // 最大4件に絞る
         const length = events.length > 4 ? 4 : events.length;
+        // URLのリストを作成
+        const URLs: string[] = [];
+
         for (let i = 0; i < length; i++) {
             const event = events[i];
             const event_title = (event.getElementsByClassName('name d-inline-block')[0] as HTMLHeadingElement).innerText;
 
             // 期間の開始を除外
-            if (event_title.indexOf("可能期間の開始") !== -1) continue;
-
+            if (event_title.indexOf("可能期間の開始") !== -1){
+                URLs.push("");
+                continue;
+            }
             const cardBody = event.getElementsByClassName('description card-body')[0];
             const event_unixtime = parseInt(cardBody.getElementsByClassName('col-11')[0].getElementsByTagName("a")[0].href.split("&time=")[1]);
             lefttime_list.push(event_unixtime);
@@ -182,6 +187,8 @@ async function showUpcomingAsignments() {
             if (event_url.indexOf("&action=") !== -1) {
                 event_url = event_url.split("&action=")[0];
             }
+            URLs.push(event_url);
+
             const event_course = (event.getElementsByClassName('col-11')[event.getElementsByClassName('col-11').length - 1] as HTMLAnchorElement).innerText;
             newNode.innerHTML += `
         <div class="card my-2">
@@ -189,17 +196,33 @@ async function showUpcomingAsignments() {
                 <h6 class="card-subtitle">${event_course}</h6>
                 <h5 class="card-title">${event_title}</h5>
                 <div style="display: flex; justify-content: space-between;">
-                
                     <h6 class="card-subtitle mb-2 text-muted">${event_date}<br/>残り時間>> <span class="left_realtime_clock"></span></h6>
-                    <a href="${event_url}" class="btn btn-primary" style="height: fit-content;">課題を確認する</a>
+                    <a href="${event_url}" class="btn btn-primary num-${i}" style="height: fit-content;">課題を確認する</a>
                 </div>
             </div>
         </div>
         `;
         }
         document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
-
         showTime();
+
+        for (let i = 0; i < length; i++)
+        {
+            // 課題提出済みならボタンのスタイルを変更
+            if(URLs[i]){
+                const isSubmitted_data = await (await fetch(URLs[i])).text();
+                const isSubmitted_parser = new DOMParser();
+                const isSubmitted_htmlDoc = isSubmitted_parser.parseFromString(isSubmitted_data, 'text/html');
+                const isSubmitted : boolean = isSubmitted_htmlDoc.getElementsByClassName("submissionstatussubmitted cell c1 lastcol")[0] ? true : false;
+                if(isSubmitted){
+                    const status_button = document.getElementsByClassName(`btn btn-primary num-${i}`)[0];
+                    status_button.className = `btn btn-secondary num-${i}`;
+                    status_button.textContent = "提出済み";
+                }
+            }
+        }
+
+
     } catch (e) {
         console.log("[Moodle Plus] Failed to show upcoming assignments");
         console.log(e);

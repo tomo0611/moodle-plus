@@ -1,3 +1,5 @@
+/// <reference path="types.d.ts" />
+
 // スクリプトが読み込まれた時の処理
 console.log("[Moodle Plus] content script script loaded");
 console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());
@@ -159,69 +161,81 @@ async function showUpcomingAsignments() {
         newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
         newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
 
-        // 期限の近い課題を取得
-        const upcoming_data = await (await fetch(`https://${window.location.host}/calendar/view.php?view=upcoming`)).text();
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(upcoming_data, 'text/html');
-        // 課題一覧
-        const events = htmlDoc.getElementsByClassName('eventlist my-1')[0].getElementsByClassName("event mt-3");
-        // 最大4件に絞る
-        const length = events.length > 4 ? 4 : events.length;
-        // URLのリストを作成
-        const URLs: string[] = [];
+        // Tokenを取得
+        // @ts-ignore
+        const sessionKey: string | null = window.M?.cfg.sesskey ?? null;
 
-        for (let i = 0; i < length; i++) {
-            const event = events[i];
-            const event_title = (event.getElementsByClassName('name d-inline-block')[0] as HTMLHeadingElement).innerText;
-
-            // 期間の開始を除外
-            if (event_title.indexOf("可能期間の開始") !== -1){
-                URLs.push("");
-                continue;
-            }
-            const cardBody = event.getElementsByClassName('description card-body')[0];
-            const event_unixtime = parseInt(cardBody.getElementsByClassName('col-11')[0].getElementsByTagName("a")[0].href.split("&time=")[1]);
-            lefttime_list.push(event_unixtime);
-            const event_date = (cardBody.getElementsByClassName('col-11')[0] as HTMLAnchorElement).innerText;
-            let event_url = (event.getElementsByClassName('card-link')[0] as HTMLAnchorElement).href;
-            if (event_url.indexOf("&action=") !== -1) {
-                event_url = event_url.split("&action=")[0];
-            }
-            URLs.push(event_url);
-
-            const event_course = (event.getElementsByClassName('col-11')[event.getElementsByClassName('col-11').length - 1] as HTMLAnchorElement).innerText;
-            newNode.innerHTML += `
-        <div class="card my-2">
-            <div class="card-body">
-                <h6 class="card-subtitle">${event_course}</h6>
-                <h5 class="card-title">${event_title}</h5>
-                <div style="display: flex; justify-content: space-between;">
-                    <h6 class="card-subtitle mb-2 text-muted">${event_date}<br/>残り時間>> <span class="left_realtime_clock"></span></h6>
-                    <a href="${event_url}" class="btn btn-primary num-${i}" style="height: fit-content;">課題を確認する</a>
-                </div>
-            </div>
-        </div>
-        `;
+        if (sessionKey === null) {
+            console.error("[Moodle Plus] Failed to get session key");
+            return;
         }
+
+        // 期限の近い課題を取得
+        const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_calendar_upcoming_view`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{
+                index: 0,
+                methodname: 'core_calendar_get_calendar_upcoming_view',
+                args: {
+                    courseid: '1',
+                    categoryid: '0',
+                },
+            }]),
+        });
+
+        if (!upcomingAssignmentsRes.ok) {
+            console.error("[Moodle Plus] Failed to fetch upcoming assignments");
+            return;
+        }
+    
+        const upcomingAssignments = (await upcomingAssignmentsRes.json())[0] as {
+            data: {
+                categoryid: number;
+                courseid: number;
+                date: Record<string, number | string>;
+                defaulteventcontext: number;
+                events: MoodleEvent[];
+                filter_selector: string;
+                isloggedin: boolean;
+            };
+            error: boolean;
+        };
+
+        const parsedAssignments = upcomingAssignments.data.events
+            .filter((event) => !event.name.includes("可能期間の開始"))
+            .map((event) => ({
+                courseName: event.course.fullname,
+                assignmentTitle: event.activityname,
+                dueDate: event.timestart,
+                url: event.url,
+                hasSubmitted: (event.action == null),
+            }))
+            .splice(0, 4);
+        
+        const htmledAssignments = parsedAssignments.map((assignment, i) => {
+            const dueDate = new Date(assignment.dueDate * 1000);
+            const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
+            return `<div class="card my-2">
+    <div class="card-body">
+        <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
+        <h5 class="card-title">${assignment.assignmentTitle}</h5>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock"></span></h6>
+            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'primary'} num-${i}" style="height: fit-content;">${assignment.hasSubmitted ? '提出済み' : '課題を確認する'}</a>
+        </div>
+    </div>
+</div>`;
+        });
+
+        lefttime_list.push(...parsedAssignments.map((assignment) => assignment.dueDate));
+
+        newNode.innerHTML += htmledAssignments.join('\n');
+
         document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
         showTime();
-
-        for (let i = 0; i < length; i++)
-        {
-            // 課題提出済みならボタンのスタイルを変更
-            if(URLs[i]){
-                const isSubmitted_data = await (await fetch(URLs[i])).text();
-                const isSubmitted_parser = new DOMParser();
-                const isSubmitted_htmlDoc = isSubmitted_parser.parseFromString(isSubmitted_data, 'text/html');
-                const isSubmitted : boolean = isSubmitted_htmlDoc.getElementsByClassName("submissionstatussubmitted cell c1 lastcol")[0] ? true : false;
-                if(isSubmitted){
-                    const status_button = document.getElementsByClassName(`btn btn-primary num-${i}`)[0];
-                    status_button.className = `btn btn-secondary num-${i}`;
-                    status_button.textContent = "提出済み";
-                }
-            }
-        }
-
 
     } catch (e) {
         console.log("[Moodle Plus] Failed to show upcoming assignments");

@@ -104,8 +104,25 @@ function dateToString(date: Date, withDay: boolean = false): string {
     return time;
 }
 
-// 提出期限(unixtime)をまとめた配列
-const lefttime_list: number[] = [];
+function dhms(ms: number) {
+    const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+    const daysms = ms % (24 * 60 * 60 * 1000);
+    const hours = Math.floor((daysms) / (60 * 60 * 1000));
+    const hoursms = ms % (60 * 60 * 1000);
+    const minutes = Math.floor((hoursms) / (60 * 1000));
+    const minutesms = ms % (60 * 1000);
+    const sec = Math.floor((minutesms) / (1000));
+    
+    const res: string[] = [];
+    res.push(hours.toString().padStart(2, '0'));
+    res.push(minutes.toString().padStart(2, '0'));
+    res.push(sec.toString().padStart(2, '0'));
+
+    return (days ? `${days}日 ` : '') + res.join(":");
+}
+
+// eventId と 残り時間のKV
+const lefttime_list = new Map<number, number>();
 
 /**
  * 残り時間を表示します。
@@ -121,28 +138,27 @@ function showTime() {
             realtime_clock.textContent = time;
         }
 
-
-        for (let i = 0; i < lefttime_list.length; i++) {
-            const lefttime = lefttime_list[i];
-            const lefttime_span = document.getElementsByClassName("left_realtime_clock")[i] as HTMLSpanElement;
-            const lefttime_date = new Date(lefttime * 1000 - date.getTime() - 1000 * 3600 * 9);
-            let lefttime_time = dateToString(lefttime_date, true);
-            if (lefttime_date.getTime() < 0) {
-                const elapsed = new Date(date.getTime() - lefttime * 1000 - 1000 * 3600 * 9);
-                lefttime_time = `⚠️期限切れ⚠️ -${dateToString(elapsed,true)}`;
+        // 残り時間を表示
+        lefttime_list.forEach((dueTime, eventId) => {
+            const lefttime_span = document.querySelector(`.left_realtime_clock[data-moodle-plus-event-id="${eventId}"]`) as HTMLSpanElement;
+            const remaining = dueTime - Date.now();
+            let lefttime_time = dhms(remaining);
+            if (remaining < 0) {
+                const elapsed = Math.abs(remaining);
+                lefttime_time = `⚠️期限切れ⚠️ -${dhms(elapsed)}`;
                 lefttime_span.style.color = "black";
                 lefttime_span.style.backgroundColor = "yellow";
                 lefttime_span.style.padding = "4px";
                 lefttime_span.style.borderRadius = "3px";
                 lefttime_span.style.margin = "5px";
-            } else  if (lefttime_date.getDate() - 1 === 0) {
+            } else if (remaining < 1000 * 60 * 60 * 24) {
                 lefttime_span.style.color = "red";
                 lefttime_span.style.fontWeight = "bold";
                 lefttime_span.style.fontSize = "1.8em";
             }
             lefttime_span.innerText = lefttime_time;
             lefttime_span.textContent = lefttime_time;
-        }
+        });
 
         // 1秒後にまた実行
         setTimeout(showTime, 1000);
@@ -204,33 +220,50 @@ async function showUpcomingAsignments() {
             error: boolean;
         };
 
+        let i: number = 0;
+        const now = Date.now();
         const parsedAssignments = upcomingAssignments.data.events
             .filter((event) => !event.name.includes("可能期間の開始"))
             .map((event) => ({
+                eventId: event.id,
                 courseName: event.course.fullname,
                 assignmentTitle: event.activityname,
-                dueDate: event.timestart,
+                dueDate: (event.timestart + event.timeduration) * 1000,
                 url: event.url,
                 hasSubmitted: (event.action == null),
             }))
-            .splice(0, 4);
+            .sort((a, b) => a.dueDate - b.dueDate)
+            .filter((event) => {
+                if (event.dueDate - now < 1000 * 60 * 60 * 30) {
+                    // 30時間以内の場合は絶対残す
+                    i++;
+                    return true;
+                } else if (i < 4) {
+                    // 4つまで表示
+                    i++;
+                    return true;
+                }
+                return false;
+            });
         
         const htmledAssignments = parsedAssignments.map((assignment, i) => {
-            const dueDate = new Date(assignment.dueDate * 1000);
+            const dueDate = new Date(assignment.dueDate);
             const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
             return `<div class="card my-2">
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-            <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock"></span></h6>
+            <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
             <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'primary'} num-${i}" style="height: fit-content;">${assignment.hasSubmitted ? '提出済み' : '課題を確認する'}</a>
         </div>
     </div>
 </div>`;
         });
 
-        lefttime_list.push(...parsedAssignments.map((assignment) => assignment.dueDate));
+        parsedAssignments.forEach((assignment) => {
+            lefttime_list.set(assignment.eventId, assignment.dueDate);
+        });
 
         newNode.innerHTML += htmledAssignments.join('\n');
 

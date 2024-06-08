@@ -8,7 +8,6 @@ Moodle Plus はオープンソースの教育支援システム「Moodle」に�
 
 - **今出てる課題がホームに**: 課題提出忘れを大幅に減らせます！
 - **サイトニュースを畳む**: 長い文のサイトニュース、しまっちゃおう！
-- **カスタムフォント**: 筆記体や丸文字などの自由なフォントを選べます！
 
 ## スクリーンショット
 
@@ -16,8 +15,9 @@ Moodle Plus はオープンソースの教育支援システム「Moodle」に�
 
 ## インストール方法
 
-Chrome: Chrome のウェブストアからインストール
-Edge: Microsoft Edge アドオンからインストール
+Chrome: [Chrome のウェブストア](https://chromewebstore.google.com/detail/moodle-plus/nncecmfhijadiddmmnajjaemlpnknplh)からインストール
+Edge: [Microsoft Edge アドオン](https://microsoftedge.microsoft.com/addons/detail/odiokdoddkknajccbiclcbfjpbjijlhc)からインストール
+Firefox: [Firefox のアドオンストア](https://addons.mozilla.org/ja/firefox/addon/moodle-plus/)からインストール
 
 ## 対応状況
 

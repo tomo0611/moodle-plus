@@ -1,6 +1,6 @@
 {
     "name": "Moodle Plus",
-    "version": "1.1",
+    "version": "2.0",
     "manifest_version": 3,
     "default_locale": "ja",
     "description": "Moodleにちょっとした機能を追加します!",
@@ -18,11 +18,18 @@
                 "https://moodle.s.kyushu-u.ac.jp/*"
             ],
             "js": [
-                "./dist/content_script.js"
+                "./dist/content_script_injector.js"
             ],
             "css": [
                 "./styles/main.css"
             ]
         }
-    ]
+    ],
+    "web_accessible_resources": [{
+        "resources": [ "dist/content_script.js" ],
+        "matches": [
+            "https://lms.omu.ac.jp/*",
+            "https://moodle.s.kyushu-u.ac.jp/*"
+        ]
+    }]
 }

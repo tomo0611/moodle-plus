@@ -52,34 +52,50 @@
     /** サイトニュースを最小化 */
     function minimizeNewsFeed() {
         try {
-            const title = document.getElementById("site-news-forum")?.getElementsByTagName("h2")[0];
+            const newsForumEl = document.getElementById("site-news-forum");
+
+            if (!newsForumEl) {
+                console.log("[Moodle Plus] News Feed is not found");
+                return;
+            }
+
+            const title = newsForumEl.getElementsByTagName("h2")[0];
             if (title) {
                 title.innerText = "サイトニュース (コンパクト版)";
             }
-            const lastlink = document.getElementById("site-news-forum")?.lastElementChild?.lastElementChild as HTMLAnchorElement;
-            const subscribeButton = document.getElementById("site-news-forum")?.getElementsByClassName("subscribelink")[0].children[0] as HTMLAnchorElement;
+            const lastlink = newsForumEl.lastElementChild?.lastElementChild as HTMLAnchorElement;
+            const subscribeButton = newsForumEl.getElementsByClassName("subscribelink")[0].children[0] as HTMLAnchorElement;
             subscribeButton.innerText = "長いお知らせ達を読む";
             subscribeButton.textContent = "長いお知らせ達を読む";
             subscribeButton.href = lastlink.href;
-            const titles = document.getElementById("site-news-forum")?.getElementsByClassName("h6 font-weight-bold mb-0");
+            const articles = newsForumEl.querySelectorAll("article.forum-post-container") as NodeListOf<HTMLDivElement>;
             // create new element
             const newNode = document.createElement("div");
             newNode.innerHTML = `<h6>☆お知らせ (タイトルのみ)</h6>`;
-            if (titles) {
-                for (let i = 0; i < titles.length; i++) {
-                    const title = titles[i] as HTMLAnchorElement;
-                    newNode.innerHTML += title.innerText + "<br/>";
-                }
+            if (articles.length > 0) {
+                const newArticles: string[] = [];
+                [...articles].forEach((article) => {
+                    const title = (article.getElementsByClassName("h6 font-weight-bold mb-0")[0] as HTMLHeadingElement).innerText ?? null;
+                    const link = (article.querySelector(".post-actions a[href*='forum/discuss.php']") as HTMLAnchorElement)?.href ?? null;
+                    if (!title) return;
+                    
+                    if (!link) {
+                        newArticles.push(title);
+                    } else {
+                        newArticles.push(`<a href="${link}">${title}</a>`);
+                    }
+                });
+
+                newNode.innerHTML += '<ul>' + newArticles.map((el) => `<li>${el}</li>`).join('') + '</ul>';
             }
-            document.getElementById("site-news-forum")?.lastElementChild?.remove();
+            newsForumEl.lastElementChild?.remove();
             // add element at lastElement of site-news-forum
-            document.getElementById("site-news-forum")?.appendChild(newNode);
+            newsForumEl.appendChild(newNode);
         } catch (e) {
             console.log("[Moodle Plus] News Feed Format is not as expected");
             console.log(e);
         }
     }
-
 
     /**
      * Dateオブジェクトを表示用の文字列に変換します。

@@ -15,7 +15,8 @@
         {
             "matches": [
                 "https://lms.omu.ac.jp/*",
-                "https://moodle.s.kyushu-u.ac.jp/*"
+                "https://moodle.s.kyushu-u.ac.jp/*",
+                "https://elms.u-aizu.ac.jp/*"
             ],
             "js": [
                 "./dist/content_script_injector.js"
@@ -32,7 +33,8 @@
             ],
             "matches": [
                 "https://lms.omu.ac.jp/*",
-                "https://moodle.s.kyushu-u.ac.jp/*"
+                "https://moodle.s.kyushu-u.ac.jp/*",
+                "https://elms.u-aizu.ac.jp/*"
             ]
         }
     ]

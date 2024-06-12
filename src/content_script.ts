@@ -192,7 +192,8 @@
             const newNode = document.createElement("span");
             newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
-            newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
+            newNode.innerHTML += `<div>※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。</div>`;
+            newNode.innerHTML += `<div>※「課題を確認する」ボタンになっている場合は、提出済みの場合に加え、<b>提出状況が不明の場合もあります。</b>提出期限前に、もう一度提出できているかを確認するようにしてください。</div>`;
             newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
 
             // Tokenを取得
@@ -248,7 +249,7 @@
                     assignmentTitle: event.activityname,
                     dueDate: (event.timestart + event.timeduration) * 1000,
                     url: event.url,
-                    hasSubmitted: (event.action == null),
+                    hasSubmitted: (event.action == null || event.action.name !== '課題を新規に提出する' || event.action.actionable === false),
                 }))
                 .sort((a, b) => a.dueDate - b.dueDate)
                 .filter((event) => {
@@ -267,13 +268,13 @@
             const htmledAssignments = parsedAssignments.map((assignment, i) => {
                 const dueDate = new Date(assignment.dueDate);
                 const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
-                return `<div class="card my-2">
+                return `<div class="card my-2" ${!assignment.hasSubmitted && 'style="box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'primary'} num-${i}" style="height: fit-content;">${assignment.hasSubmitted ? '提出済み' : '課題を確認する'}</a>
+            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'warning'} num-${i}" style="height: fit-content; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? '課題を確認する' : '未提出'}</a>
         </div>
     </div>
 </div>`;

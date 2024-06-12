@@ -193,7 +193,7 @@
             newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
             newNode.innerHTML += `<div>※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。</div>`;
-            newNode.innerHTML += `<div>※「課題を確認する」ボタンになっている場合は、提出済みの場合に加え、<b>提出状況が不明の場合もあります。</b>提出期限前に、もう一度提出できているかを確認するようにしてください。</div>`;
+            newNode.innerHTML += `<div>※「課題を確認する」ボタンになっている場合は、提出済みの場合に加え、<b>提出状況が不明の場合もあります。</b>提出期限前に、提出できているかを再確認するようにしてください。</div>`;
             newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
 
             // Tokenを取得

@@ -268,7 +268,7 @@
             const htmledAssignments = parsedAssignments.map((assignment, i) => {
                 const dueDate = new Date(assignment.dueDate);
                 const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
-                return `<div class="card my-2" ${!assignment.hasSubmitted && 'style="box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
+                return `<div class="card my-2" ${!assignment.hasSubmitted && 'style="border: 4px solid #f0ad4e;"'}>
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>

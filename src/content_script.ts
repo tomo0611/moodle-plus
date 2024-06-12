@@ -122,6 +122,11 @@
         return time;
     }
 
+    /**
+     * ミリ秒を日:時:分:秒の形式の文字列に変換します。
+     * @param ms - ミリ秒
+     * @returns 日:時:分:秒の形式の文字列（日はある場合のみ）
+     */
     function dhms(ms: number) {
         const days = Math.floor(ms / (24 * 60 * 60 * 1000));
         const daysms = ms % (24 * 60 * 60 * 1000);
@@ -226,6 +231,7 @@
                 return;
             }
         
+            // 生のデータ（JSON）
             const upcomingAssignments = (await upcomingAssignmentsRes.json())[0] as {
                 data: {
                     categoryid: number;
@@ -241,9 +247,11 @@
 
             let i: number = 0;
             const now = Date.now();
+
+            // 生データを整形
             const parsedAssignments = upcomingAssignments.data.events
-                .filter((event) => !event.name.includes("可能期間の開始"))
-                .map((event) => ({
+                .filter((event) => !event.name.includes("可能期間の開始")) // 開始イベントを除外
+                .map((event) => ({ // 必要な情報だけに絞る
                     eventId: event.id,
                     courseName: event.course.fullname,
                     assignmentTitle: event.activityname,
@@ -251,8 +259,10 @@
                     url: event.url,
                     hasSubmitted: (event.action == null || event.action.name !== '課題を新規に提出する' || event.action.actionable === false),
                 }))
-                .sort((a, b) => a.dueDate - b.dueDate)
+                .sort((a, b) => a.dueDate - b.dueDate) // 期限が近い順にソート
                 .filter((event) => {
+                    // 掲載する個数制限
+                    
                     if (event.dueDate - now < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
                         i++;
@@ -265,6 +275,7 @@
                     return false;
                 });
             
+            // 整形したデータからHTMLを生成
             const htmledAssignments = parsedAssignments.map((assignment, i) => {
                 const dueDate = new Date(assignment.dueDate);
                 const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
@@ -280,6 +291,7 @@
 </div>`;
             });
 
+            // 残り時間を表示するためのデータをセット
             parsedAssignments.forEach((assignment) => {
                 lefttime_list.set(assignment.eventId, assignment.dueDate);
             });

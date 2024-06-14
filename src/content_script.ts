@@ -169,6 +169,7 @@
                 if (remaining < 0) {
                     const elapsed = Math.abs(remaining);
                     lefttime_time = `⚠️期限切れ⚠️ -${dhms(elapsed)}`;
+                    lefttime_span.style.display = "inline-block";
                     lefttime_span.style.color = "black";
                     lefttime_span.style.backgroundColor = "yellow";
                     lefttime_span.style.padding = "4px";
@@ -205,19 +206,39 @@
             // @ts-ignore
             const sessionKey: string | null = window.M?.cfg.sesskey ?? null;
 
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const timesortfrom = Math.floor(now.valueOf() / 1000) - 60 * 60 * 24 * 1; // 1日前から
+            const timesortto = Math.floor(now.valueOf() / 1000) + 60 * 60 * 24 * 7;
+
             if (sessionKey === null) {
                 console.error("[Moodle Plus] Failed to get session key");
                 return;
             }
 
-            // 期限の近い課題を取得
-            const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_calendar_upcoming_view`, {
+            /**
+             * 期限の近い課題を取得
+             * 
+             * - `core_calendar_get_action_events_by_timesort` では提出済みの課題が表示されない
+             * - `core_calendar_get_calendar_upcoming_view` では期限切れの課題が表示されない
+             * 
+             * ので両方fetch
+             */
+            const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_action_events_by_timesort,core_calendar_get_calendar_upcoming_view`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify([{
                     index: 0,
+                    methodname: 'core_calendar_get_action_events_by_timesort',
+                    args: {
+                        timesortfrom,
+                        timesortto, // 30日後まで
+                        limitnum: 10,
+                    },
+                }, {
+                    index: 1,
                     methodname: 'core_calendar_get_calendar_upcoming_view',
                     args: {
                         courseid: '1',
@@ -232,25 +253,19 @@
             }
         
             // 生のデータ（JSON）
-            const upcomingAssignments = (await upcomingAssignmentsRes.json())[0] as {
-                data: {
-                    categoryid: number;
-                    courseid: number;
-                    date: Record<string, number | string>;
-                    defaulteventcontext: number;
-                    events: MoodleEvent[];
-                    filter_selector: string;
-                    isloggedin: boolean;
-                };
-                error: boolean;
-            };
+            const upcomingAssignments = (await upcomingAssignmentsRes.json()) as [
+                GetActionEventsByTimesortRes,
+                GetCalendarUpcomingViewRes,
+            ];
 
             let i: number = 0;
-            const now = Date.now();
+
+            // 重複を除去して統合
+            const mergedAssignments = Array.from(new Map(upcomingAssignments.flatMap((res) => res.data.events.map((event) => [event.id, event]))).values());
 
             // 生データを整形
-            const parsedAssignments = upcomingAssignments.data.events
-                .filter((event) => !event.name.includes("可能期間の開始")) // 開始イベントを除外
+            const parsedAssignments = mergedAssignments
+                .filter((event) => !event.name.includes("可能期間の開始") && event.normalisedeventtype === 'course') // 開始イベントを除外・授業イベント以外を除外
                 .map((event) => ({ // 必要な情報だけに絞る
                     eventId: event.id,
                     courseName: event.course.fullname,
@@ -259,11 +274,12 @@
                     url: event.url,
                     hasSubmitted: (event.action == null || event.action.name !== '課題を新規に提出する' || event.action.actionable === false),
                 }))
+                .filter((event) => event.dueDate > now.getTime() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
                 .sort((a, b) => a.dueDate - b.dueDate) // 期限が近い順にソート
                 .filter((event) => {
                     // 掲載する個数制限
                     
-                    if (event.dueDate - now < 1000 * 60 * 60 * 30) {
+                    if (event.dueDate - now.getTime() < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
                         i++;
                         return true;

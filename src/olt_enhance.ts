@@ -16,7 +16,8 @@
         }
 
         attoEditor.forEach((editor) => {
-            const content = editor.querySelector<HTMLElement>('[contenteditable="true"]')!; // contenteditableな要素を取得
+            const content = editor.querySelector<HTMLElement>('[contenteditable="true"]'); // contenteditableな要素を取得
+            if (!content) return;
             const count = document.createElement('div');
             count.style.fontSize = 'small';
             count.style.color = '#666';

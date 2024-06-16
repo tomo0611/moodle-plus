@@ -27,9 +27,12 @@
             count.textContent = `文字数: ${getTextLengthInEl(content)}`;
             editor.appendChild(count);
 
-            content.addEventListener('input', () => {
+            // 非同期で下書きが復元されるので初回はMutationObserverで監視する
+            const observer = new MutationObserver(() => {
                 count.textContent = `文字数: ${getTextLengthInEl(content)}`;
+                observer.disconnect();
             });
+            observer.observe(content, { childList: true, subtree: true });
         });
     });
 })();

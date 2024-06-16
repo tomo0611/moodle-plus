@@ -6,7 +6,6 @@
         // トップページ書き換えスクリプト
         src = 'dist/index_rewrite.js';
     } else if ([
-        '/mod/quiz/view.php',
         '/mod/assign/view.php',
         '/mod/questionnaire/view.php',
     ].includes(location.pathname)) {

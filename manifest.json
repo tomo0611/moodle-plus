@@ -30,7 +30,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "dist/content_script.js"
+                "dist/index_rewrite.js",
+                "dist/olt_enhance.js"
             ],
             "matches": [
                 "https://lms.omu.ac.jp/*",

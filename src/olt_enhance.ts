@@ -12,7 +12,7 @@
         function getTextLengthInEl(el: HTMLElement): number {
             // 異体字セレクタを考慮して文字数をカウントする
             // ref: https://qiita.com/bon127/items/491b25e90208188dafbd#intlsegmenter
-            return [...new Intl.Segmenter('ja', { granularity: 'grapheme' }).segment(el.innerText ?? '')].length;
+            return [...new Intl.Segmenter('ja', { granularity: 'grapheme' }).segment(el.innerText.replace(/[\n\u200B]/g, ''))].length;
         }
 
         attoEditor.forEach((editor) => {
@@ -33,6 +33,10 @@
                 observer.disconnect();
             });
             observer.observe(content, { childList: true, subtree: true });
+
+            content.addEventListener('input', () => {
+                count.textContent = `文字数: ${getTextLengthInEl(content)}`;
+            });
         });
     });
 })();

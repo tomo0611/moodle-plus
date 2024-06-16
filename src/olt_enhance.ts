@@ -5,7 +5,7 @@
 
     // atto editorがマウントされるまで待つ
     function onLoad() {
-        console.log("[Moodle Plus] Page loaded. Start enhancing OLT");
+        console.log("[Moodle Plus] Page loaded. Start enhancing Atto editor");
         const attoEditor = document.querySelectorAll('.editor_atto_wrap');
         if (attoEditor.length === 0) return;
 

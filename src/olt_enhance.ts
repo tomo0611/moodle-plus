@@ -4,8 +4,8 @@
     console.log("[Moodle Plus] olt enhance script loaded. Waiting for page load");
 
     // atto editorがマウントされるまで待つ
-    window.addEventListener('load', () => {
-
+    function onLoad() {
+        console.log("[Moodle Plus] Page loaded. Start enhancing Atto editor");
         const attoEditor = document.querySelectorAll('.editor_atto_wrap');
         if (attoEditor.length === 0) return;
 
@@ -38,5 +38,11 @@
                 count.textContent = `文字数: ${getTextLengthInEl(content)}`;
             }, { passive: true });
         });
-    });
+    }
+
+    if (document.readyState !== 'complete') {
+        window.addEventListener('load', onLoad);
+    } else {
+        onLoad();
+    }
 })();

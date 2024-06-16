@@ -36,7 +36,7 @@
 
             content.addEventListener('input', () => {
                 count.textContent = `文字数: ${getTextLengthInEl(content)}`;
-            });
+            }, { passive: true });
         });
     });
 })();

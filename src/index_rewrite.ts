@@ -122,11 +122,6 @@
         return time;
     }
 
-    /**
-     * ミリ秒を日:時:分:秒の形式の文字列に変換します。
-     * @param ms - ミリ秒
-     * @returns 日:時:分:秒の形式の文字列（日はある場合のみ）
-     */
     function dhms(ms: number) {
         const days = Math.floor(ms / (24 * 60 * 60 * 1000));
         const daysms = ms % (24 * 60 * 60 * 1000);
@@ -169,7 +164,6 @@
                 if (remaining < 0) {
                     const elapsed = Math.abs(remaining);
                     lefttime_time = `⚠️期限切れ⚠️ -${dhms(elapsed)}`;
-                    lefttime_span.style.display = "inline-block";
                     lefttime_span.style.color = "black";
                     lefttime_span.style.backgroundColor = "yellow";
                     lefttime_span.style.padding = "4px";
@@ -198,47 +192,26 @@
             const newNode = document.createElement("span");
             newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
-            newNode.innerHTML += `<div>※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。</div>`;
-            newNode.innerHTML += `<div>※「課題を確認する」ボタンになっている場合は、提出済みの場合に加え、<b>提出状況が不明の場合もあります。</b>提出期限前に、提出できているかを再確認するようにしてください。</div>`;
+            newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
             newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
 
             // Tokenを取得
             // @ts-ignore
             const sessionKey: string | null = window.M?.cfg.sesskey ?? null;
 
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            const timesortfrom = Math.floor(now.valueOf() / 1000) - 60 * 60 * 24 * 1; // 1日前から
-            const timesortto = Math.floor(now.valueOf() / 1000) + 60 * 60 * 24 * 7;
-
             if (sessionKey === null) {
                 console.error("[Moodle Plus] Failed to get session key");
                 return;
             }
 
-            /**
-             * 期限の近い課題を取得
-             * 
-             * - `core_calendar_get_action_events_by_timesort` では提出済みの課題が表示されない
-             * - `core_calendar_get_calendar_upcoming_view` では期限切れの課題が表示されない
-             * 
-             * ので両方fetch
-             */
-            const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_action_events_by_timesort,core_calendar_get_calendar_upcoming_view`, {
+            // 期限の近い課題を取得
+            const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_calendar_upcoming_view`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify([{
                     index: 0,
-                    methodname: 'core_calendar_get_action_events_by_timesort',
-                    args: {
-                        timesortfrom,
-                        timesortto, // 30日後まで
-                        limitnum: 10,
-                    },
-                }, {
-                    index: 1,
                     methodname: 'core_calendar_get_calendar_upcoming_view',
                     args: {
                         courseid: '1',
@@ -252,34 +225,34 @@
                 return;
             }
         
-            // 生のデータ（JSON）
-            const upcomingAssignments = (await upcomingAssignmentsRes.json()) as [
-                GetActionEventsByTimesortRes,
-                GetCalendarUpcomingViewRes,
-            ];
+            const upcomingAssignments = (await upcomingAssignmentsRes.json())[0] as {
+                data: {
+                    categoryid: number;
+                    courseid: number;
+                    date: Record<string, number | string>;
+                    defaulteventcontext: number;
+                    events: MoodleEvent[];
+                    filter_selector: string;
+                    isloggedin: boolean;
+                };
+                error: boolean;
+            };
 
             let i: number = 0;
-
-            // 重複を除去して統合
-            const mergedAssignments = Array.from(new Map(upcomingAssignments.flatMap((res) => res.data.events.map((event) => [event.id, event]))).values());
-
-            // 生データを整形
-            const parsedAssignments = mergedAssignments
-                .filter((event) => !event.name.includes("可能期間の開始") && event.normalisedeventtype === 'course') // 開始イベントを除外・授業イベント以外を除外
-                .map((event) => ({ // 必要な情報だけに絞る
+            const now = Date.now();
+            const parsedAssignments = upcomingAssignments.data.events
+                .filter((event) => !event.name.includes("可能期間の開始"))
+                .map((event) => ({
                     eventId: event.id,
                     courseName: event.course.fullname,
                     assignmentTitle: event.activityname,
                     dueDate: (event.timestart + event.timeduration) * 1000,
                     url: event.url,
-                    hasSubmitted: (event.action == null || event.action.name !== '課題を新規に提出する' || event.action.actionable === false),
+                    hasSubmitted: (event.action == null),
                 }))
-                .filter((event) => event.dueDate > now.getTime() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
-                .sort((a, b) => a.dueDate - b.dueDate) // 期限が近い順にソート
+                .sort((a, b) => a.dueDate - b.dueDate)
                 .filter((event) => {
-                    // 掲載する個数制限
-                    
-                    if (event.dueDate - now.getTime() < 1000 * 60 * 60 * 30) {
+                    if (event.dueDate - now < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
                         i++;
                         return true;
@@ -291,23 +264,21 @@
                     return false;
                 });
             
-            // 整形したデータからHTMLを生成
             const htmledAssignments = parsedAssignments.map((assignment, i) => {
                 const dueDate = new Date(assignment.dueDate);
                 const dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
-                return `<div class="card my-2" ${!assignment.hasSubmitted && 'style="border: 4px solid #f0ad4e;"'}>
+                return `<div class="card my-2">
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'warning'} num-${i}" style="height: fit-content; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? '課題を確認する' : '未提出'}</a>
+            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted ? 'secondary' : 'primary'} num-${i}" style="height: fit-content;">${assignment.hasSubmitted ? '提出済み' : '課題を確認する'}</a>
         </div>
     </div>
 </div>`;
             });
 
-            // 残り時間を表示するためのデータをセット
             parsedAssignments.forEach((assignment) => {
                 lefttime_list.set(assignment.eventId, assignment.dueDate);
             });

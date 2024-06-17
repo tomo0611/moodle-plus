@@ -171,8 +171,8 @@
             }
 
             // 残り時間を表示
-            lefttime_list.forEach((dueTime, instanceId) => {
-                const lefttime_span = document.querySelector(`.left_realtime_clock[data-moodle-plus-event-id="${instanceId}"]`) as HTMLSpanElement;
+            lefttime_list.forEach((dueTime, eventId) => {
+                const lefttime_span = document.querySelector(`.left_realtime_clock[data-moodle-plus-event-id="${eventId}"]`) as HTMLSpanElement;
                 const remaining = dueTime - Date.now();
                 let lefttime_time = dhms(remaining);
                 if (remaining < 0) {
@@ -295,6 +295,7 @@
                             };
                         } else {
                             acc.push({
+                                eventId: event.id,
                                 instanceId: event.instance,
                                 courseName: event.course.fullname,
                                 assignmentTitle: event.activityname,
@@ -313,6 +314,7 @@
                             };
                         } else {
                             acc.push({
+                                eventId: event.id,
                                 instanceId: event.instance,
                                 courseName: event.course.fullname,
                                 assignmentTitle: event.activityname,
@@ -358,7 +360,7 @@
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-            <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.instanceId}"></span></h6>
+            <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
             <a href="${assignment.url}" class="btn btn-${!assignment.hasSubmitted ? 'warning' : 'secondary'} num-${i}" style="height: fit-content; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
         </div>
     </div>
@@ -369,7 +371,7 @@
 
                 // 残り時間を表示するためのデータをセット
                 parsedAssignments.forEach((assignment) => {
-                    lefttime_list.set(assignment.instanceId, assignment.dueDate);
+                    lefttime_list.set(assignment.eventId, assignment.dueDate);
                 });
 
                 showTime();

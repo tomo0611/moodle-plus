@@ -117,6 +117,7 @@ interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
 }
 
 type ParsedAssignments = {
+    eventId: number;
     instanceId: number;
     courseName: string;
     assignmentTitle: string;

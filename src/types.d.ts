@@ -91,3 +91,37 @@ interface MoodleEvent {
     mindayerror: string;
     draggable: boolean;
 }
+
+interface MoodleServiceRes {
+    error: boolean;
+};
+
+interface GetActionEventsByTimesortRes extends MoodleServiceRes {
+    data: {
+        events: MoodleEvent[];
+        firstid: number;
+        lastid: number;
+    }
+}
+
+interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
+    data: {
+        categoryid: number;
+        courseid: number;
+        date: Record<string, number | string>;
+        defaulteventcontext: number;
+        events: MoodleEvent[];
+        filter_selector: string;
+        isloggedin: boolean;
+    }
+}
+
+type ParsedAssignments = {
+    instanceId: number;
+    courseName: string;
+    assignmentTitle: string;
+    startDate?: number;
+    dueDate: number;
+    url: string;
+    hasSubmitted: boolean;
+};

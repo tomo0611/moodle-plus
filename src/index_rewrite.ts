@@ -331,7 +331,7 @@
                         // 30時間以内の場合は絶対残す
                         i++;
                         return true;
-                    } else if (i < 6) {
+                    } else if (i < 4) {
                         // 4つまで表示
                         i++;
                         return true;

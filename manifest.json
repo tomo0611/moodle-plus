@@ -21,7 +21,7 @@
                 "https://mdl.media.gunma-u.ac.jp/*"
             ],
             "js": [
-                "./dist/content_script_injector.js"
+                "./dist/content_script.js"
             ],
             "css": [
                 "./styles/main.css"

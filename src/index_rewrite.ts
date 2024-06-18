@@ -208,7 +208,16 @@
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
             newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
             newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
-            newNode.innerHTML += `<div id="upcoming_assignments"><div class="card my-2 py-6 text-center" id="hide_on_load">読み込み中…</div></div>`;
+            newNode.innerHTML += `<div id="upcoming_assignments">
+    <div class="card my-2 py-6 text-center" id="hide_on_load">
+        <div>
+            <div class="d-inline-block spinner-border spinner-border-sm" role="status">
+                <span class="sr-only">Loading...</span>
+            </div><br/>
+            読み込み中…
+        </div>
+    </div>
+</div>`;
 
             document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
 
@@ -279,7 +288,7 @@
                 .reduce((acc: ParsedAssignments[], event: MoodleEvent) => { // 開始と終了のイベントを結合して、ついでにデータを成形する
                     
                     // ここでは簡易判定。確実に提出してない場合だけをfalseにする
-                    function packHasSubmitted(action: MoodleAction | undefined): boolean {
+                    function getHasSubmitted(action: MoodleAction | undefined): boolean {
                         if (action != null && ['課題を新規に提出する', '問題を受験する'].includes(action.name) && action.actionable) {
                             return false;
                         }
@@ -302,7 +311,7 @@
                                 startDate: event.timestart * 1000,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
-                                hasSubmitted: packHasSubmitted(event.action),
+                                hasSubmitted: getHasSubmitted(event.action),
                             });
                         }
                     } else {
@@ -320,7 +329,7 @@
                                 assignmentTitle: event.activityname,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
-                                hasSubmitted: packHasSubmitted(event.action),
+                                hasSubmitted: getHasSubmitted(event.action),
                             });
                         }
                     }

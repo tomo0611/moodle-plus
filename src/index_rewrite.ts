@@ -413,11 +413,14 @@
             }
 
             // 各課題ページにアクセスして提出状況を取得（Promise.allで同時並行で取得して高速化を図る）
-            const submissionStatuses = await Promise.all(parsedAssignments.map(async (assignment) => {
-                const res = await fetch(assignment.url);
-                const html = await res.text();
-                return ({ instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) });
-            }));
+            const submissionStatuses = await Promise.all(parsedAssignments
+                .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
+                .map(async (assignment) => {
+                    const res = await fetch(assignment.url);
+                    const html = await res.text();
+                    return ({ instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) });
+                })
+            );
 
             // 提出状況を更新
             const updatedAssignments = parsedAssignments.map((assignment) => {

@@ -66,7 +66,6 @@
             const lastlink = newsForumEl.lastElementChild?.lastElementChild as HTMLAnchorElement;
             const subscribeButton = newsForumEl.getElementsByClassName("subscribelink")[0].children[0] as HTMLAnchorElement;
             subscribeButton.innerText = "長いお知らせ達を読む";
-            subscribeButton.textContent = "長いお知らせ達を読む";
             subscribeButton.href = lastlink.href;
             const articles = newsForumEl.querySelectorAll("article.forum-post-container") as NodeListOf<HTMLDivElement>;
             // create new element
@@ -178,6 +177,7 @@
                 if (remaining < 0) {
                     const elapsed = Math.abs(remaining);
                     lefttime_time = `⚠️期限切れ⚠️ -${dhms(elapsed)}`;
+                    lefttime_span.style.display = "inline-block";
                     lefttime_span.style.color = "black";
                     lefttime_span.style.backgroundColor = "yellow";
                     lefttime_span.style.padding = "4px";
@@ -327,6 +327,7 @@
                                 instanceId: event.instance,
                                 courseName: event.course.fullname,
                                 assignmentTitle: event.activityname,
+                                startDate: event.timeduration > 0 ? event.timestart * 1000 : undefined,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
                                 hasSubmitted: getHasSubmitted(event.action),
@@ -370,7 +371,7 @@
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${!assignment.hasSubmitted ? 'warning' : 'secondary'} num-${i}" style="height: fit-content; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
+            <a href="${assignment.url}" class="btn btn-${!assignment.hasSubmitted ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '<div class="d-inline-block spinner-border spinner-border-sm mr-1" role="status"><span class="sr-only">Loading...</span></div>提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
         </div>
     </div>
 </div>`;
@@ -398,9 +399,9 @@
                     // 課題・テストの提出状況
                     const assignmentState = (doc.getElementsByClassName("submissionstatussubmitted cell c1 lastcol").length > 0) ? true : false;
                     // アンケートの提出状況
-                    const questionnaireState = (doc.querySelector(".yourresponse") !== null) ? true : false;
+                    const questionnaireState = (doc.getElementsByClassName("yourresponse").length > 0) ? true : false;
                     // フィードバックの提出状況
-                    const feedbackState = (doc.querySelector(".continuebutton") !== null) ? true : false;
+                    const feedbackState = (doc.getElementsByClassName("continuebutton").length > 0) ? true : false;
 
                     console.log(`[Moodle Plus] Submission Status for ${instanceId}: `, { assignmentState, questionnaireState, feedbackState });
 
@@ -421,7 +422,7 @@
             // 提出状況を更新
             const updatedAssignments = parsedAssignments.map((assignment) => {
                 const submissionStatus = submissionStatuses.find((status) => status.instanceId === assignment.instanceId);
-                return { ...assignment, hasSubmitted: submissionStatus?.hasSubmitted ?? assignment.hasSubmitted };
+                return { ...assignment, hasSubmitted: (submissionStatus?.hasSubmitted != null) ? submissionStatus.hasSubmitted : assignment.hasSubmitted };
             });
             renderAssignmentsCard(updatedAssignments);
         } catch (e) {

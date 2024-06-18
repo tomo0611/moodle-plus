@@ -14,3 +14,8 @@
 #page-wrapper #page {
     background-color: #acded4 !important;
 }
+
+/* spinner */
+#upcoming_assignments .spinner-border-sm {
+    border-width: .15em !important;
+}

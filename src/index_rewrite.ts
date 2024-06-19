@@ -336,10 +336,10 @@
                     }
                     return acc;
                 }, [])
-                .filter((event) => event.dueDate > now.getTime() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
+                .filter((event) => event.dueDate > Date.now() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
                 .sort((a, b) => a.dueDate - b.dueDate) // 期限が近い順にソート
                 .filter((event) => { // 掲載する個数制限
-                    if (event.dueDate - now.getTime() < 1000 * 60 * 60 * 30) {
+                    if (event.dueDate - Date.now() < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
                         i++;
                         return true;

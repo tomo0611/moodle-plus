@@ -308,6 +308,7 @@
                                 instanceId: event.instance,
                                 courseName: event.course.fullname,
                                 assignmentTitle: event.activityname,
+                                moduleName: event.modulename,
                                 startDate: event.timestart * 1000,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
@@ -327,6 +328,7 @@
                                 instanceId: event.instance,
                                 courseName: event.course.fullname,
                                 assignmentTitle: event.activityname,
+                                moduleName: event.modulename,
                                 startDate: event.timeduration > 0 ? event.timestart * 1000 : undefined,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
@@ -417,13 +419,13 @@
             }[] = await Promise.all(parsedAssignments
                 .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
                 .map(async (assignment) => {
-                    if (assignment.url.includes('mod/feedback')) {
+                    if (assignment.moduleName === 'feedback') {
                         // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
-                        return ({ instanceId: assignment.instanceId, hasSubmitted: 'unknown' });
+                        return { instanceId: assignment.instanceId, hasSubmitted: 'unknown' };
                     }
                     const res = await fetch(assignment.url);
                     const html = await res.text();
-                    return ({ instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) });
+                    return { instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) };
                 })
             );
 

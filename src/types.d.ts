@@ -121,6 +121,7 @@ type ParsedAssignments = {
     instanceId: number;
     courseName: string;
     assignmentTitle: string;
+    moduleName: string;
     startDate?: number;
     dueDate: number;
     url: string;

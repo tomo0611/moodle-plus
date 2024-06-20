@@ -365,13 +365,13 @@
                         const startDateString = `${startDateInstance.getMonth() + 1}月${startDateInstance.getDate()}日 ${dateToString(startDateInstance, false)}`;
                         dueDateString += ` (${startDateString} 開始)`;
                     }
-                    return `<div class="card my-2" ${!assignment.hasSubmitted && 'style="border-color: #f0ad4e; box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
+                    return `<div class="card my-2" ${assignment.hasSubmitted === false && 'style="border-color: #f0ad4e; box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${!assignment.hasSubmitted ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${!assignment.hasSubmitted && 'font-weight: 700;'}">${assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '<div class="d-inline-block spinner-border spinner-border-sm mr-1" role="status"><span class="sr-only">Loading...</span></div>提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
+            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted === false ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${(assignment.hasSubmitted === false) && 'font-weight: 700;'}">${assignment.hasSubmitted === 'unknown' ? '提出状況不明' : assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '<div class="d-inline-block spinner-border spinner-border-sm mr-1" role="status"><span class="sr-only">Loading...</span></div>提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
         </div>
     </div>
 </div>`;
@@ -390,8 +390,8 @@
             // いったん仮データで表示してしまう（正確な提出状況データの取得には時間がかかるため）
             renderAssignmentsCard(parsedAssignments, true);
 
-            // ほんとうの提出状況を取得
-            function determineStatusByHtml(html: string, instanceId: number): boolean {
+            // ほんとうの提出状況を取得（提出しているのがtrue）
+            function determineStatusByHtml(html: string, instanceId: number) {
                 try {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
@@ -400,22 +400,27 @@
                     const assignmentState = (doc.getElementsByClassName("submissionstatussubmitted cell c1 lastcol").length > 0) ? true : false;
                     // アンケートの提出状況
                     const questionnaireState = (doc.getElementsByClassName("yourresponse").length > 0) ? true : false;
-                    // フィードバックの提出状況
-                    const feedbackState = (doc.getElementsByClassName("continuebutton").length > 0) ? true : false;
 
-                    console.log(`[Moodle Plus] Submission Status for ${instanceId}: `, { assignmentState, questionnaireState, feedbackState });
+                    console.log(`[Moodle Plus] Submission Status for ${instanceId}: `, { assignmentState, questionnaireState });
 
-                    return assignmentState || questionnaireState || feedbackState;
+                    return assignmentState || questionnaireState;
                 } catch (e) {
                     console.log("[Moodle Plus] Failed to determine submission status by HTML");
-                    return false;
+                    return 'unknown';
                 }
             }
 
             // 各課題ページにアクセスして提出状況を取得（Promise.allで同時並行で取得して高速化を図る）
-            const submissionStatuses = await Promise.all(parsedAssignments
+            const submissionStatuses: {
+                instanceId: number;
+                hasSubmitted: boolean | 'unknown';
+            }[] = await Promise.all(parsedAssignments
                 .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
                 .map(async (assignment) => {
+                    if (assignment.url.includes('mod/feedback')) {
+                        // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
+                        return ({ instanceId: assignment.instanceId, hasSubmitted: 'unknown' });
+                    }
                     const res = await fetch(assignment.url);
                     const html = await res.text();
                     return ({ instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) });

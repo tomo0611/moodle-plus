@@ -125,5 +125,6 @@ type ParsedAssignments = {
     startDate?: number;
     dueDate: number;
     url: string;
+    actionAvailable?: boolean;
     hasSubmitted: boolean | 'unknown';
 };

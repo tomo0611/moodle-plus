@@ -171,7 +171,8 @@
 
             // 残り時間を表示
             lefttime_list.forEach((dueTime, eventId) => {
-                const lefttime_span = document.querySelector(`.left_realtime_clock[data-moodle-plus-event-id="${eventId}"]`) as HTMLSpanElement;
+                const lefttime_span = document.querySelector<HTMLSpanElement>(`.left_realtime_clock[data-moodle-plus-event-id="${eventId}"]`);
+                if (!lefttime_span) return;
                 const remaining = dueTime - Date.now();
                 let lefttime_time = dhms(remaining);
                 if (remaining < 0) {
@@ -207,7 +208,7 @@
             newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
             newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
-            newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">もっと見る</a></div>`;
+            newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">詳しく見る</a></div>`;
             newNode.innerHTML += `<div id="upcoming_assignments">
     <div class="card my-2 py-6 text-center" id="hide_on_load">
         <div>
@@ -218,6 +219,37 @@
         </div>
     </div>
 </div>`;
+            const actionsButtonWrapper = document.createElement("div");
+            actionsButtonWrapper.classList.add("text-right", "my-2");
+            const actionsButtonGroup = document.createElement("div");
+            actionsButtonGroup.classList.add("btn-group");
+
+            const reloadButton = document.createElement("button");
+            reloadButton.className = "btn btn-sm btn-outline-secondary";
+            reloadButton.innerText = "提出状況を更新";
+            reloadButton.addEventListener("click", async () => {
+                reloadButton.disabled = true;
+                await reload();
+                reloadButton.disabled = false;
+            });
+
+            const fetchMoreButton = document.createElement("button");
+            fetchMoreButton.className = "btn btn-sm btn-outline-secondary";
+            fetchMoreButton.innerText = "もっと見る";
+            fetchMoreButton.addEventListener("click", async () => {
+                fetchMoreButton.disabled = true;
+                await fetchMore();
+                if (limitedAssignments.length >= parsedAssignments.length) {
+                    fetchMoreButton.remove();
+                } else {
+                    fetchMoreButton.disabled = false;
+                }
+            });
+
+            actionsButtonGroup.appendChild(reloadButton);
+            actionsButtonGroup.appendChild(fetchMoreButton);
+            actionsButtonWrapper.appendChild(actionsButtonGroup);
+            newNode.appendChild(actionsButtonWrapper);
 
             document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
 
@@ -277,8 +309,6 @@
                 GetCalendarUpcomingViewRes,
             ];
 
-            let i: number = 0;
-
             // 重複を除去して統合
             const mergedAssignments = Array.from(new Map(upcomingAssignments.flatMap((res) => res.data.events.map((event) => [event.id, event]))).values());
 
@@ -312,6 +342,7 @@
                                 startDate: event.timestart * 1000,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
+                                actionAvailable: event.action != null ? event.action.actionable : undefined,
                                 hasSubmitted: getHasSubmitted(event.action),
                             });
                         }
@@ -332,6 +363,7 @@
                                 startDate: event.timeduration > 0 ? event.timestart * 1000 : undefined,
                                 dueDate: (event.timestart + event.timeduration) * 1000,
                                 url: event.url,
+                                actionAvailable: event.action != null ? event.action.actionable : undefined,
                                 hasSubmitted: getHasSubmitted(event.action),
                             });
                         }
@@ -339,41 +371,77 @@
                     return acc;
                 }, [])
                 .filter((event) => event.dueDate > Date.now() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
-                .sort((a, b) => a.dueDate - b.dueDate) // 期限が近い順にソート
-                .filter((event) => { // 掲載する個数制限
+                .sort((a, b) => a.dueDate - b.dueDate); // 期限が近い順にソート
+
+            /**
+             * 課題の表示数を制限する
+             * @param assignments 課題データ
+             * @param limit 表示する個数の上限（デフォルト: 4）
+             */
+            function limitAssignments(assignments: ParsedAssignments[], limit: number = 4) {
+                let i: number = 0;
+                
+                return assignments.filter((event) => { // 掲載する個数制限
                     if (event.dueDate - Date.now() < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
                         i++;
                         return true;
-                    } else if (i < 4) {
-                        // 4つまで表示
+                    } else if (i < limit) {
+                        // limit個まで表示
                         i++;
                         return true;
                     }
                     return false;
                 });
+            }
 
-            console.log("[Moodle Plus] Upcoming Assignments: ", parsedAssignments);
+            let limitedAssignments = limitAssignments(parsedAssignments);
+
+            console.log("[Moodle Plus] Upcoming Assignments: ", limitedAssignments);
             
-            // カードを生成して表示する関数
-            function renderAssignmentsCard(assignments: ParsedAssignments[], isStatePartial: boolean = false) {
+            /**
+             * カードを生成して表示する関数
+             * @param assignments 課題データ
+             * @param isPartial 提出状況が不明なものを「読み込み中」として表示するか？
+             */
+            function renderAssignmentsCard(assignments: ParsedAssignments[], isPartial: boolean = false) {
                 // 整形したデータからHTMLを生成
                 const htmledAssignments = assignments.map((assignment, i) => {
                     const dueDate = new Date(assignment.dueDate);
                     let dueDateString = `${dueDate.getMonth() + 1}月${dueDate.getDate()}日 ${dateToString(dueDate, false)}`;
-                    const hasNotStarted = assignment.startDate && assignment.startDate > Date.now();
+                    const hasNotStarted = assignment.startDate != null && assignment.startDate > Date.now();
+                    const hasNotSubmitted = (!hasNotStarted || assignment.actionAvailable === false) && assignment.hasSubmitted === false;
                     const startDateInstance = assignment.startDate ? new Date(assignment.startDate) : null;
                     if (startDateInstance) {
                         const startDateString = `${startDateInstance.getMonth() + 1}月${startDateInstance.getDate()}日 ${dateToString(startDateInstance, false)}`;
                         dueDateString += ` (${startDateString} 開始)`;
                     }
-                    return `<div class="card my-2" ${assignment.hasSubmitted === false && 'style="border-color: #f0ad4e; box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
+
+                    const buttonText = (() => {
+                        if (assignment.hasSubmitted === 'unknown') {
+                            return '提出状況不明';
+                        } else if (hasNotStarted) {
+                            return '開始前';
+                        } else if (assignment.actionAvailable === false) {
+                            return 'まだ提出できないかも';
+                        } else if (assignment.hasSubmitted === true) {
+                            if (isPartial) {
+                                return '<div class="d-inline-block spinner-border spinner-border-sm mr-1" role="status"><span class="sr-only">Loading...</span></div>提出状況を確認中';
+                            } else {
+                                return '提出済み';
+                            }
+                        } else {
+                            return '課題を確認する';
+                        }
+                    })();
+
+                    return `<div class="card my-2" ${hasNotSubmitted && 'style="border-color: #f0ad4e; box-shadow: inset 0 0 0 3px #f0ad4e;"'}>
     <div class="card-body">
         <h6 class="card-subtitle" style="margin-top: 0;">${assignment.courseName}</h6>
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${assignment.hasSubmitted === false ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${(assignment.hasSubmitted === false) && 'font-weight: 700;'}">${assignment.hasSubmitted === 'unknown' ? '提出状況不明' : assignment.hasSubmitted ? (hasNotStarted ? '開始前' : isStatePartial ? '<div class="d-inline-block spinner-border spinner-border-sm mr-1" role="status"><span class="sr-only">Loading...</span></div>提出状況を確認中' : '提出済み') : '課題を確認する'}</a>
+            <a href="${assignment.url}" class="btn btn-${hasNotSubmitted ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${(hasNotSubmitted) && 'font-weight: 700;'}">${buttonText}</a>
         </div>
     </div>
 </div>`;
@@ -382,7 +450,7 @@
                 document.getElementById('upcoming_assignments')!.innerHTML = htmledAssignments.join('\n');
 
                 // 残り時間を表示するためのデータをセット
-                parsedAssignments.forEach((assignment) => {
+                assignments.forEach((assignment) => {
                     lefttime_list.set(assignment.eventId, assignment.dueDate);
                 });
 
@@ -390,9 +458,13 @@
             }
 
             // いったん仮データで表示してしまう（正確な提出状況データの取得には時間がかかるため）
-            renderAssignmentsCard(parsedAssignments, true);
+            renderAssignmentsCard(limitedAssignments, true);
 
-            // ほんとうの提出状況を取得（提出しているのがtrue）
+            /**
+             * HTMLから提出状況を判定
+             * @param html HTML文字列
+             * @param instanceId インスタンスID（モジュールのID）
+             */
             function determineStatusByHtml(html: string, instanceId: number) {
                 try {
                     const parser = new DOMParser();
@@ -400,41 +472,64 @@
 
                     // 課題・テストの提出状況
                     const assignmentState = (doc.getElementsByClassName("submissionstatussubmitted cell c1 lastcol").length > 0) ? true : false;
+                    // 複数回受験可能なテストの提出状況
+                    const quizState = (doc.querySelectorAll(".quizattemptsummary tbody>tr").length > 0) ? true : false;
                     // アンケートの提出状況
                     const questionnaireState = (doc.getElementsByClassName("yourresponse").length > 0) ? true : false;
 
                     console.log(`[Moodle Plus] Submission Status for ${instanceId}: `, { assignmentState, questionnaireState });
 
-                    return assignmentState || questionnaireState;
+                    return assignmentState || quizState || questionnaireState;
                 } catch (e) {
                     console.log("[Moodle Plus] Failed to determine submission status by HTML");
                     return 'unknown';
                 }
             }
 
-            // 各課題ページにアクセスして提出状況を取得（Promise.allで同時並行で取得して高速化を図る）
-            const submissionStatuses: {
-                instanceId: number;
-                hasSubmitted: boolean | 'unknown';
-            }[] = await Promise.all(parsedAssignments
-                .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
-                .map(async (assignment) => {
-                    if (assignment.moduleName === 'feedback') {
-                        // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
-                        return { instanceId: assignment.instanceId, hasSubmitted: 'unknown' };
-                    }
-                    const res = await fetch(assignment.url);
-                    const html = await res.text();
-                    return { instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) };
-                })
-            );
+            /**
+             * 各課題ページにアクセスして提出状況を取得（Promise.allで同時並行で取得して高速化を図る）
+             * @param assignments 課題データ
+             */
+            async function fetchSubmissionStatuses(assignments: ParsedAssignments[]) {
+                const submissionStatuses: {
+                    instanceId: number;
+                    hasSubmitted: boolean | 'unknown';
+                }[] = await Promise.all(assignments
+                    .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
+                    .map(async (assignment) => {
+                        if (assignment.moduleName === 'feedback') {
+                            // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
+                            return { instanceId: assignment.instanceId, hasSubmitted: 'unknown' };
+                        }
+                        const res = await fetch(assignment.url);
+                        const html = await res.text();
+                        return { instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) };
+                    })
+                );
 
-            // 提出状況を更新
-            const updatedAssignments = parsedAssignments.map((assignment) => {
-                const submissionStatus = submissionStatuses.find((status) => status.instanceId === assignment.instanceId);
-                return { ...assignment, hasSubmitted: (submissionStatus?.hasSubmitted != null) ? submissionStatus.hasSubmitted : assignment.hasSubmitted };
-            });
-            renderAssignmentsCard(updatedAssignments);
+                // 提出状況を更新
+                const updatedAssignments = assignments.map((assignment) => {
+                    const submissionStatus = submissionStatuses.find((status) => status.instanceId === assignment.instanceId);
+                    return { ...assignment, hasSubmitted: (submissionStatus?.hasSubmitted != null) ? submissionStatus.hasSubmitted : assignment.hasSubmitted };
+                });
+                renderAssignmentsCard(updatedAssignments);
+            }
+            
+            fetchSubmissionStatuses(limitedAssignments);
+
+            /** 「もっと見る」ボタンの実装 */
+            async function fetchMore() {
+                limitedAssignments = limitAssignments(parsedAssignments, limitedAssignments.length + 4);
+                console.log("[Moodle Plus] Fetch more assignments: ", limitedAssignments);
+                renderAssignmentsCard(limitedAssignments, true);
+                await fetchSubmissionStatuses(limitedAssignments);
+            }
+
+            /** 「提出状況を更新」ボタンの実装 */
+            async function reload() {
+                renderAssignmentsCard(limitedAssignments, true);
+                await fetchSubmissionStatuses(limitedAssignments);
+            }
         } catch (e) {
             console.log("[Moodle Plus] Failed to show upcoming assignments");
             console.log(e);

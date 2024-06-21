@@ -226,24 +226,30 @@
 
             const reloadButton = document.createElement("button");
             reloadButton.className = "btn btn-sm btn-outline-secondary";
-            reloadButton.innerText = "提出状況を更新";
+            reloadButton.innerText = "提出状況を再確認";
+            reloadButton.disabled = true;
             reloadButton.addEventListener("click", async () => {
                 reloadButton.disabled = true;
+                fetchMoreButton.disabled = true;
                 await reload();
                 reloadButton.disabled = false;
+                fetchMoreButton.disabled = false;
             });
 
             const fetchMoreButton = document.createElement("button");
             fetchMoreButton.className = "btn btn-sm btn-outline-secondary";
             fetchMoreButton.innerText = "もっと見る";
+            fetchMoreButton.disabled = true;
             fetchMoreButton.addEventListener("click", async () => {
                 fetchMoreButton.disabled = true;
+                reloadButton.disabled = true;
                 await fetchMore();
                 if (limitedAssignments.length >= parsedAssignments.length) {
                     fetchMoreButton.remove();
                 } else {
                     fetchMoreButton.disabled = false;
                 }
+                reloadButton.disabled = false;
             });
 
             actionsButtonGroup.appendChild(reloadButton);
@@ -483,13 +489,19 @@
             /**
              * 各課題ページにアクセスして提出状況を取得（Promise.allで同時並行で取得して高速化を図る）
              * @param assignments 課題データ
+             * @param instanceIds 提出状況を更新したいインスタンスID（モジュールのID）のリスト
              */
-            async function fetchSubmissionStatuses(assignments: ParsedAssignments[]) {
+            async function fetchSubmissionStatuses(assignments: ParsedAssignments[], instanceIds?: number[]) {
                 const submissionStatuses: {
                     instanceId: number;
                     hasSubmitted: boolean | 'unknown';
                 }[] = await Promise.all(assignments
-                    .filter((assignment) => assignment.startDate == null || assignment.startDate < Date.now()) // 未開始の課題はスキップ
+                    .filter((assignment) => {
+                        if (instanceIds != null && !instanceIds.includes(assignment.instanceId)) {
+                            return false;
+                        }
+                        return assignment.startDate == null || assignment.startDate < Date.now();// 未開始の課題はスキップ
+                    })
                     .map(async (assignment) => {
                         if (assignment.moduleName === 'feedback') {
                             // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
@@ -511,10 +523,12 @@
 
             /** 「もっと見る」ボタンの実装 */
             async function fetchMore() {
+                let instanceIds = limitedAssignments.map((assignment) => assignment.instanceId);
                 limitedAssignments = limitAssignments(parsedAssignments, limitedAssignments.length + 4);
+                instanceIds = limitedAssignments.map((assignment) => assignment.instanceId).filter((id) => !instanceIds.includes(id));
                 console.log("[Moodle Plus] Fetch more assignments: ", limitedAssignments);
                 renderAssignmentsCard(limitedAssignments, true);
-                await fetchSubmissionStatuses(limitedAssignments);
+                await fetchSubmissionStatuses(limitedAssignments, instanceIds);
             }
 
             /** 「提出状況を更新」ボタンの実装 */
@@ -531,7 +545,10 @@
             // いったん仮データで表示してしまう（正確な提出状況データの取得には時間がかかるため）
             renderAssignmentsCard(limitedAssignments, true);
 
-            fetchSubmissionStatuses(limitedAssignments);
+            fetchSubmissionStatuses(limitedAssignments).then(() => {
+                reloadButton.disabled = false;
+                fetchMoreButton.disabled = false;
+            });
             //#endregion
         } catch (e) {
             console.log("[Moodle Plus] Failed to show upcoming assignments");

@@ -77,7 +77,7 @@
                     const title = (article.getElementsByClassName("h6 font-weight-bold mb-0")[0] as HTMLHeadingElement).innerText ?? null;
                     const link = (article.querySelector(".post-actions a[href*='forum/discuss.php']") as HTMLAnchorElement)?.href ?? null;
                     if (!title) return;
-                    
+
                     if (!link) {
                         newArticles.push(title);
                     } else {
@@ -134,7 +134,7 @@
         const minutes = Math.floor((hoursms) / (60 * 1000));
         const minutesms = ms % (60 * 1000);
         const sec = Math.floor((minutesms) / (1000));
-        
+
         const res: string[] = [];
         res.push(hours.toString().padStart(2, '0'));
         res.push(minutes.toString().padStart(2, '0'));
@@ -159,7 +159,7 @@
         }
 
         try {
-            
+
             // 現在時刻を表示
             let date = new Date();
             let time = dateToString(date, false);
@@ -302,7 +302,7 @@
                 console.error("[Moodle Plus] Failed to fetch upcoming assignments");
                 return;
             }
-        
+
             // 生のデータ（JSON）
             const upcomingAssignments = (await upcomingAssignmentsRes.json()) as [
                 GetActionEventsByTimesortRes,
@@ -316,13 +316,13 @@
             const parsedAssignments: ParsedAssignments[] = mergedAssignments
                 .filter((event) => event.normalisedeventtype === 'course') // 授業イベント以外を除外
                 .reduce((acc: ParsedAssignments[], event: MoodleEvent) => { // 開始と終了のイベントを結合して、ついでにデータを成形する
-                    
+
                     // ここでは簡易判定。確実に提出してない場合だけをfalseにする
                     function getHasSubmitted(action: MoodleAction | undefined): boolean {
                         if (action != null && ['課題を新規に提出する', '問題を受験する'].includes(action.name) && action.actionable) {
-                            return false;
+                            return false; // 絶対提出できてないやつ
                         }
-                        return true;
+                        return true; // それ以外
                     }
 
                     if (event.eventtype === 'open') {
@@ -373,6 +373,7 @@
                 .filter((event) => event.dueDate > Date.now() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
                 .sort((a, b) => a.dueDate - b.dueDate); // 期限が近い順にソート
 
+            //#region 描画用の関数定義群
             /**
              * 課題の表示数を制限する
              * @param assignments 課題データ
@@ -380,7 +381,7 @@
              */
             function limitAssignments(assignments: ParsedAssignments[], limit: number = 4) {
                 let i: number = 0;
-                
+
                 return assignments.filter((event) => { // 掲載する個数制限
                     if (event.dueDate - Date.now() < 1000 * 60 * 60 * 30) {
                         // 30時間以内の場合は絶対残す
@@ -395,10 +396,6 @@
                 });
             }
 
-            let limitedAssignments = limitAssignments(parsedAssignments);
-
-            console.log("[Moodle Plus] Upcoming Assignments: ", limitedAssignments);
-            
             /**
              * カードを生成して表示する関数
              * @param assignments 課題データ
@@ -457,9 +454,6 @@
                 showTime();
             }
 
-            // いったん仮データで表示してしまう（正確な提出状況データの取得には時間がかかるため）
-            renderAssignmentsCard(limitedAssignments, true);
-
             /**
              * HTMLから提出状況を判定
              * @param html HTML文字列
@@ -514,8 +508,6 @@
                 });
                 renderAssignmentsCard(updatedAssignments);
             }
-            
-            fetchSubmissionStatuses(limitedAssignments);
 
             /** 「もっと見る」ボタンの実装 */
             async function fetchMore() {
@@ -530,6 +522,17 @@
                 renderAssignmentsCard(limitedAssignments, true);
                 await fetchSubmissionStatuses(limitedAssignments);
             }
+            //#endregion
+
+            //#region 初回描画処理
+            let limitedAssignments = limitAssignments(parsedAssignments);
+            console.log("[Moodle Plus] Upcoming Assignments: ", limitedAssignments);
+
+            // いったん仮データで表示してしまう（正確な提出状況データの取得には時間がかかるため）
+            renderAssignmentsCard(limitedAssignments, true);
+
+            fetchSubmissionStatuses(limitedAssignments);
+            //#endregion
         } catch (e) {
             console.log("[Moodle Plus] Failed to show upcoming assignments");
             console.log(e);

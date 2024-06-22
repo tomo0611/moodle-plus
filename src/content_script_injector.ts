@@ -8,6 +8,7 @@
     } else if ([
         '/mod/assign/view.php',
         '/mod/questionnaire/view.php',
+        '/mod/feedback/complete.php',
     ].includes(location.pathname)) {
         // オンラインテキストエディタの文字数をカウントするスクリプト
         src = 'dist/olt_enhance.js';

@@ -444,7 +444,7 @@
         <h5 class="card-title">${assignment.assignmentTitle}</h5>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <h6 class="card-subtitle mb-2 text-muted">${dueDateString}<br/>残り時間>> <span class="left_realtime_clock" data-moodle-plus-event-id="${assignment.eventId}"></span></h6>
-            <a href="${assignment.url}" class="btn btn-${hasNotSubmitted ? 'warning' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${(hasNotSubmitted) && 'font-weight: 700;'}">${buttonText}</a>
+            <a href="${assignment.url}" class="btn btn-${hasNotSubmitted ? 'primary' : 'secondary'} num-${i}" style="display: flex; align-items: center; ${(hasNotSubmitted) && 'font-weight: 700;'}">${buttonText}</a>
         </div>
     </div>
 </div>`;

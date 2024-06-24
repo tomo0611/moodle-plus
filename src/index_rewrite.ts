@@ -31,25 +31,27 @@
         K extends keyof PostMessageDataFromExtension,
     >(data: PostMessageDataFromInjectedScript[keyof PostMessageDataFromInjectedScript], key: K) {
         return new Promise<PostMessageDataFromExtension[K]>((resolve, reject) => {
-            let attempt = 0;
+            let timeoutTimer: number | null = null;
             
             function listener(event: MessageEvent) {
                 if (event.source !== window) return;
                 const res: PostMessageDataFromExtension[K] = event.data;
                 if (res && res.type && res.type === key) {
                     window.removeEventListener('message', listener);
+                    if (timeoutTimer) {
+                        clearTimeout(timeoutTimer);
+                    }
                     resolve(res);
-                } else if (attempt > 10) {
-                    window.removeEventListener('message', listener);
-                    reject('Timeout');
-                } else {
-                    attempt++;
                 }
             }
             window.addEventListener('message', listener);
 
             console.log("[Moodle Plus] Requesting to extension: ", data);
             window.postMessage(data, '*');
+            timeoutTimer = window.setTimeout(() => {
+                window.removeEventListener('message', listener);
+                reject('timeout');
+            }, 5000);
         });
     }
 
@@ -81,8 +83,11 @@
                 title.classList.add('pr-2');
                 const versionRes = await makeRequestToExtension({
                     type: 'moodlePlus:misc:requestGetVersion',
-                }, 'moodlePlus:misc:getVersion');
-                title.innerHTML = `む～どるぷらす (Moodle Plus) <a href="https://github.com/tomo0611/moodle-plus/blob/main/CHANGELOG.md" target="_blank" style="font-size: .9375rem;" class="badge badge-secondary">v${versionRes.payload.version}</a>`;
+                }, 'moodlePlus:misc:getVersion').catch((_) => {});
+                title.innerHTML = 'む～どるぷらす (Moodle Plus)';
+                if (versionRes) {
+                    title.innerHTML += ` <a href="https://github.com/tomo0611/moodle-plus/blob/main/CHANGELOG.md" target="_blank" style="font-size: .9375rem;" class="badge badge-secondary">v${versionRes.payload.version}</a>`;
+                }
                 const subtitle = document.createElement("p");
                 subtitle.innerHTML = `Developed by <a href="https://tomo0611.jp/" target="_blank">tomo0611</a> (大阪公立大学 工学部 情報工)</br>
                 バグなどの報告は<a href="https://github.com/tomo0611/moodle-plus" target="_blank">こちら</a>までお願いします。`;

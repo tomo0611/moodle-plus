@@ -209,6 +209,7 @@
             newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
             newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
             newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">詳しく見る</a></div>`;
+            newNode.innerHTML += '<div id="moodle_plus_upcoming_assignments_fetch_error" class="alert alert-danger d-none my-3"><span></span></div>';
             newNode.innerHTML += `<div id="upcoming_assignments">
     <div class="card my-2 py-6 text-center" id="hide_on_load">
         <div>
@@ -259,6 +260,34 @@
 
             document.getElementById("maincontent")?.parentElement?.insertBefore(newNode, document.getElementById("maincontent"));
 
+            function toggleError(message?: string, withReloadButton = true) {
+                const errorEl = document.getElementById("moodle_plus_upcoming_assignments_fetch_error");
+                if (!errorEl) return;
+                const errorElText = errorEl.getElementsByTagName("span")[0];
+
+                const reloadButton = document.createElement("a");
+                reloadButton.href = "#";
+                reloadButton.innerText = "再読み込み";
+                reloadButton.addEventListener("click", (ev) => {
+                    ev.preventDefault();
+                    location.reload();
+                });
+
+                if (message != null) {
+                    errorElText.innerText = message;
+                    if (withReloadButton) {
+                        errorEl.appendChild(reloadButton);
+                    }
+                    errorEl.classList.remove("d-none");
+                } else {
+                    errorElText.innerText = "";
+                    if (errorEl.contains(reloadButton)) {
+                        errorEl.removeChild(reloadButton);
+                    }
+                    errorEl.classList.add("d-none");
+                }
+            }
+
             // Tokenを取得
             // @ts-ignore
             const sessionKey: string | null = window.M?.cfg.sesskey ?? null;
@@ -270,6 +299,7 @@
 
             if (sessionKey === null) {
                 console.error("[Moodle Plus] Failed to get session key");
+                toggleError("セッションキーの取得に失敗しました。Moodle PlusがこのMoodleには対応していない可能性があります。ページを再読み込みしても改善しない場合はMoodle Plusへのバグ報告をお願いします。");
                 return;
             }
 
@@ -306,6 +336,7 @@
 
             if (!upcomingAssignmentsRes.ok) {
                 console.error("[Moodle Plus] Failed to fetch upcoming assignments");
+                toggleError("課題の取得に失敗しました。Moodleからログアウトしている可能性があります。ページを再読み込みしてみてください。");
                 return;
             }
 
@@ -492,10 +523,9 @@
              * @param instanceIds 提出状況を更新したいインスタンスID（モジュールのID）のリスト
              */
             async function fetchSubmissionStatuses(assignments: ParsedAssignments[], instanceIds?: number[]) {
-                const submissionStatuses: {
-                    instanceId: number;
-                    hasSubmitted: boolean | 'unknown';
-                }[] = await Promise.all(assignments
+                type SubmissionStatus = { instanceId: number, hasSubmitted: boolean | 'unknown' };
+
+                const submissionStatuses: SubmissionStatus[] = await Promise.allSettled(assignments
                     .filter((assignment) => {
                         if (instanceIds != null && !instanceIds.includes(assignment.instanceId)) {
                             return false;
@@ -511,7 +541,15 @@
                         const html = await res.text();
                         return { instanceId: assignment.instanceId, hasSubmitted: determineStatusByHtml(html, assignment.instanceId) };
                     })
-                );
+                ).then((results) => {
+                    if (results.some((result) => result.status === 'rejected')) {
+                        toggleError("提出状況の詳細の取得に失敗した課題があります。Moodleを再読み込みしてみてください。それでも改善しない場合はMoodle Plusにバグ報告をお願いします。");
+                    }
+
+                    return results
+                        .filter((result) => result.status === 'fulfilled')
+                        .map((result) => (result as PromiseFulfilledResult<SubmissionStatus>).value)
+                });
 
                 // 提出状況を更新
                 const updatedAssignments = assignments.map((assignment) => {
@@ -527,12 +565,14 @@
                 limitedAssignments = limitAssignments(parsedAssignments, limitedAssignments.length + 4);
                 instanceIds = limitedAssignments.map((assignment) => assignment.instanceId).filter((id) => !instanceIds.includes(id));
                 console.log("[Moodle Plus] Fetch more assignments: ", limitedAssignments);
+                toggleError();
                 renderAssignmentsCard(limitedAssignments, true);
                 await fetchSubmissionStatuses(limitedAssignments, instanceIds);
             }
 
             /** 「提出状況を更新」ボタンの実装 */
             async function reload() {
+                toggleError();
                 renderAssignmentsCard(limitedAssignments, true);
                 await fetchSubmissionStatuses(limitedAssignments);
             }

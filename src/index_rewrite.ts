@@ -10,6 +10,47 @@
         changeTitle();
         minimizeNewsFeed();
         showUpcomingAsignments();
+        postMessageToExtension({ type: 'moodlePlus:misc:injectedScriptLoaded' });    
+    }
+
+    /**
+     * 拡張機能APIが使えるContent Scriptに一方的にメッセージを送信
+     * @param data 送信するデータ
+     */
+    function postMessageToExtension(data: PostMessageDataFromInjectedScript[keyof PostMessageDataFromInjectedScript]) {
+        window.postMessage(data, '/');
+    }
+
+    /**
+     * 拡張機能APIが使えるContent Scriptにメッセージを送信して返答を待つ
+     * @param data 送信するデータ
+     * @param key 相手からの返答に期待するキー
+     * @returns 返答データ
+     */
+    function makeRequestToExtension<
+        K extends keyof PostMessageDataFromExtension,
+    >(data: PostMessageDataFromInjectedScript[keyof PostMessageDataFromInjectedScript], key: K) {
+        return new Promise<PostMessageDataFromExtension[K]>((resolve, reject) => {
+            let attempt = 0;
+            
+            function listener(event: MessageEvent) {
+                if (event.source !== window) return;
+                const res: PostMessageDataFromExtension[K] = event.data;
+                if (res && res.type && res.type === key) {
+                    window.removeEventListener('message', listener);
+                    resolve(res);
+                } else if (attempt > 10) {
+                    window.removeEventListener('message', listener);
+                    reject('Timeout');
+                } else {
+                    attempt++;
+                }
+            }
+            window.addEventListener('message', listener);
+
+            console.log("[Moodle Plus] Requesting to extension: ", data);
+            window.postMessage(data, '*');
+        });
     }
 
     /**
@@ -28,7 +69,7 @@
 
 
     /** メインページのタイトルを変更 */
-    function changeTitle() {
+    async function changeTitle() {
         try {
             let title;
             if (document.getElementsByClassName("page-header-headings").length === 0) {
@@ -37,7 +78,11 @@
                 title = document.getElementsByClassName("page-header-headings")[0].getElementsByTagName("h1")[0];
             }
             if (title) {
-                title.innerHTML = "む～どるぷらす (Moodle Plus)";
+                title.classList.add('pr-2');
+                const versionRes = await makeRequestToExtension({
+                    type: 'moodlePlus:misc:requestGetVersion',
+                }, 'moodlePlus:misc:getVersion');
+                title.innerHTML = `む～どるぷらす (Moodle Plus) <a href="https://github.com/tomo0611/moodle-plus/blob/main/CHANGELOG.md" target="_blank" style="font-size: .9375rem;" class="badge badge-secondary">v${versionRes.payload.version}</a>`;
                 const subtitle = document.createElement("p");
                 subtitle.innerHTML = `Developed by <a href="https://tomo0611.jp/" target="_blank">tomo0611</a> (大阪公立大学 工学部 情報工)</br>
                 バグなどの報告は<a href="https://github.com/tomo0611/moodle-plus" target="_blank">こちら</a>までお願いします。`;

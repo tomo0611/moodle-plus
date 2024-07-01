@@ -18,7 +18,8 @@
                 "https://moodle.s.kyushu-u.ac.jp/*",
                 "https://elms.u-aizu.ac.jp/*",
                 "https://sulms.shiga-u.ac.jp/*",
-                "https://mdl.media.gunma-u.ac.jp/*"
+                "https://mdl.media.gunma-u.ac.jp/*",
+                "https://cms.aitech.ac.jp/*"
             ],
             "js": [
                 "./dist/content_script_injector.js"
@@ -39,7 +40,8 @@
                 "https://moodle.s.kyushu-u.ac.jp/*",
                 "https://elms.u-aizu.ac.jp/*",
                 "https://sulms.shiga-u.ac.jp/*",
-                "https://mdl.media.gunma-u.ac.jp/*"
+                "https://mdl.media.gunma-u.ac.jp/*",
+                "https://cms.aitech.ac.jp/*"
             ]
         }
     ]

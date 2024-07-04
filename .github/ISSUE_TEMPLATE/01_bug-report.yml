@@ -1,6 +1,6 @@
 name: 🐛 バグ報告
 description: サイトの誤作動があった場合はこちらにご報告ください。
-labels: ["bug?"]
+labels: ["bug"]
 
 body:
   - type: markdown
@@ -60,9 +60,11 @@ body:
         この問題が起きた環境をお教えください。
 
         例:
+          * URL of the Moodle site: https://moodle.example.ac.jp/
           * Model and OS of the device(s): MacBook Pro (14inch, 2021), macOS Ventura 13.4
           * Browser: Chrome 113.0.5672.126
       value: |
+        * URL of the Moodle site:
         * Model and OS of the device(s):
         * Browser:
       render: markdown
@@ -71,7 +73,10 @@ body:
 
   - type: checkboxes
     attributes:
-      label: 【開発者向け】自分でこのバグに対処しますか？
-      description: これが何かわからない場合は、チェックボックスを開けたままにして、そのままフォームを送信してください。
+      label: 以下に当てはまる場合はチェックしてください。
+      description: |
+        Check the items that apply. All items are optional. Check only if applicable.
+
+        項目はすべて任意です。当てはまる場合のみチェックしてください。
       options:
         - label: はい、私はこのバグに自分で対処して、このリポジトリにPull Requestを送信する予定です。

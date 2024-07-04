@@ -1,0 +1,26 @@
+name: ✨ 機能リクエスト
+description: 新機能のアイデアや提案をお寄せください。Suggest an idea for this project
+labels: ["feature"]
+
+body:
+  - type: textarea
+    attributes:
+      label: 概要 (Summary)
+      description: どういった機能が必要か、具体的にお書きください。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 目的・背景 (Purpose)
+      description: この機能が必要な理由や、どのような問題を解決するためのものかをお書きください。
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: 以下に当てはまる場合はチェックしてください。
+      description: |
+        Check the items that apply. All items are optional. Check only if applicable.
+
+        項目はすべて任意です。当てはまる場合のみチェックしてください。
+      options:
+        - label: 私は大学追加の実装を自分で行い、このリポジトリにPull Requestを送信する予定です。 (I will implement the support for my university by myself and send a pull request to this repository)

@@ -1,6 +1,6 @@
 name: 🏫 対応大学の追加
 description: Submit a request to get your university supported
-labels: ["feature"]
+labels: ["univ-request"]
 
 body:
   - type: input

@@ -407,8 +407,12 @@ async function showUpcomingAsignments() {
             .reduce((acc: ParsedAssignments[], event: MoodleEvent) => { // 開始と終了のイベントを結合して、ついでにデータを成形する
 
                 // ここでは簡易判定。確実に提出してない場合だけをfalseにする
-                function getHasSubmitted(action: MoodleAction | undefined): boolean {
-                    if (action != null && ['課題を新規に提出する', '問題を受験する'].includes(action.name) && action.actionable) {
+                function getHasSubmitted(event: MoodleEvent): boolean | 'unknown' {
+                    if (event.modulename === 'feedback') {
+                        // フィードバックの場合は、提出できたかどうかがわからないことがあるので不明として扱う
+                        return 'unknown';
+                    }
+                    if (event.action != null && ['課題を新規に提出する', '問題を受験する'].includes(event.action.name) && event.action.actionable) {
                         return false; // 絶対提出できてないやつ
                     }
                     return true; // それ以外
@@ -432,7 +436,7 @@ async function showUpcomingAsignments() {
                             dueDate: (event.timestart + event.timeduration) * 1000,
                             url: event.url,
                             actionAvailable: event.action != null ? event.action.actionable : undefined,
-                            hasSubmitted: getHasSubmitted(event.action),
+                            hasSubmitted: getHasSubmitted(event),
                         });
                     }
                 } else {
@@ -453,7 +457,7 @@ async function showUpcomingAsignments() {
                             dueDate: (event.timestart + event.timeduration) * 1000,
                             url: event.url,
                             actionAvailable: event.action != null ? event.action.actionable : undefined,
-                            hasSubmitted: getHasSubmitted(event.action),
+                            hasSubmitted: getHasSubmitted(event),
                         });
                     }
                 }

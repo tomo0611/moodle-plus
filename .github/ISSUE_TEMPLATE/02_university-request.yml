@@ -1,0 +1,29 @@
+name: 🏫 対応大学の追加
+description: Submit a request to get your university supported
+labels: ["対応校追加"]
+
+body:
+  - type: input
+    attributes:
+      label: 大学名 (University Name)
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: MoodleのURL (Moodle URLs)
+      description: MoodleのURLを記入してください。複数ある場合は改行区切りで記入してください。
+      render: text
+      placeholder: |
+        https://moodle.example.ac.jp/
+        https://moodle02.example.ac.jp/
+        ...
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: 以下に当てはまる場合はチェックしてください。
+      description: 項目はすべて任意です。当てはまる場合のみチェックしてください。
+      options:
+        - label: 上記のMoodleで動作確認を行いました。(I have tested the extension at above Moodle URLs)
+        - label: 私は大学追加の実装を自分で行い、このリポジトリにPull Requestを送信する予定です。 (I will implement the support for my university by myself and send a pull request to this repository)
+

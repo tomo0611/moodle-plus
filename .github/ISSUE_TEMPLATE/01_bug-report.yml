@@ -1,6 +1,6 @@
 name: 🐛 バグ報告
 description: サイトの誤作動があった場合はこちらにご報告ください。
-labels: ["bug?", "maybe non-developer"]
+labels: ["bug?"]
 
 body:
   - type: markdown
@@ -57,7 +57,7 @@ body:
     attributes:
       label: 💻 動作環境
       description: |
-        この問題が起きた環境をお教えください（既に埋まっている場合は記入不要です）。
+        この問題が起きた環境をお教えください。
 
         例:
           * Model and OS of the device(s): MacBook Pro (14inch, 2021), macOS Ventura 13.4

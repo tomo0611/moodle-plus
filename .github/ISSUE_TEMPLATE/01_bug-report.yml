@@ -1,5 +1,5 @@
 name: 🐛 バグ報告
-description: サイトの誤作動があった場合はこちらにご報告ください。
+description: Moodle Plusの誤作動報告 Report a bug in Moodle Plus
 labels: ["bug"]
 
 body:

@@ -117,7 +117,7 @@ interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
 }
 
 // meaQsの型
-interface Quiz {
+interface MeaQsQuiz {
     index: number;
     question: string[];
     choices?: string[[]];

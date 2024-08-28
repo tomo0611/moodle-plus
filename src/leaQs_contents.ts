@@ -50,13 +50,13 @@
     }
 
     function extractQuizElements() {
-        const quizzes: Quiz[] = [];
+        const quizzes: MeaQsQuiz[] = [];
         const quizContainers = document.querySelectorAll(
             ".fcontainer.clearfix"
         );
 
         quizContainers.forEach((container, index) => {
-            const quiz: Quiz = {
+            const quiz: MeaQsQuiz = {
                 index: index,
                 question: [],
             };

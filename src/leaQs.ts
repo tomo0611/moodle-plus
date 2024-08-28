@@ -7,7 +7,7 @@
         }
     });
 
-    function displaySummary(quizData: Quiz[], classAndSection: string) {
+    function displaySummary(quizData: MeaQsQuiz[], classAndSection: string) {
         const container = document.getElementById("container");
 
         // クラスとセクション情報を表示

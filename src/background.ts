@@ -12,7 +12,7 @@
     });
 
     async function formatAndDisplayQuiz(
-        quizData: Quiz[],
+        quizData: MeaQsQuiz[],
         className: string,
         sectionName: string
     ) {

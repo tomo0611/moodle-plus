@@ -401,7 +401,7 @@
 
             // 生データを整形
             const parsedAssignments: ParsedAssignments[] = mergedAssignments
-                .filter((event) => event.normalisedeventtype === 'course') // 授業イベント以外を除外
+                .filter((event) => event.normalisedeventtype === 'course' && event.modulename !== 'attendance') // 授業イベント以外を除外, 出欠イベントを除外
                 .reduce((acc: ParsedAssignments[], event: MoodleEvent) => { // 開始と終了のイベントを結合して、ついでにデータを成形する
 
                     // ここでは簡易判定。確実に提出してない場合だけをfalseにする

@@ -7,7 +7,7 @@ const appConfig = useAppConfig();
 export default defineContentScript({
     matches: appConfig.compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/*`),
     cssInjectionMode: 'manifest',
-    main(ctx) {
+    main() {
         // do nothing
     },
 });

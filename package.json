@@ -27,6 +27,7 @@
     "url": "https://github.com/tomo0611/moodle-plus/issues"
   },
   "homepage": "https://github.com/tomo0611/moodle-plus#readme",
+  "packageManager": "pnpm@9.3.0",
   "dependencies": {
     "vue": "^3.5.12"
   },

@@ -20,11 +20,11 @@ export default defineConfig({
             email: 'tomo0611@hotmail.com',
         },
         icons: {
-            16: 'icons/icon16.png',
-            32: 'icons/icon32.png',
-            48: 'icons/icon48.png',
-            128: 'icons/icon128.png',
-            240: 'icons/icon240.png',
+            16: '/icons/icon16.png',
+            32: '/icons/icon32.png',
+            48: '/icons/icon48.png',
+            128: '/icons/icon128.png',
+            240: '/icons/icon240.png',
         },
     },
 });

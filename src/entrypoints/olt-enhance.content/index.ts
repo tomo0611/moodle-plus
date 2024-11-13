@@ -1,10 +1,8 @@
-import { useAppConfig } from 'wxt/client';
+import { compatibleWebsiteHostnames } from '@/const';
 import { main } from './olt_enhance';
 
-const appConfig = useAppConfig();
-
 export default defineContentScript({
-    matches: appConfig.compatibleWebsiteHostnames.flatMap((hostname) => [
+    matches: compatibleWebsiteHostnames.flatMap((hostname) => [
         `*://${hostname}/mod/assign/view.php*`,
         `*://${hostname}/mod/questionnaire/view.php*`,
         `*://${hostname}/mod/feedback/complete.php*`,

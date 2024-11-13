@@ -1,4 +1,8 @@
-export function main() {
+export default defineUnlistedScript(() => {
+    main();
+});
+
+function main() {
     // スクリプトが読み込まれた時の処理
     console.log("[Moodle Plus] content script script loaded");
     console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());

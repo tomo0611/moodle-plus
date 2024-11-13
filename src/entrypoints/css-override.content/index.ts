@@ -1,11 +1,9 @@
 import './main.css';
-import { useAppConfig } from 'wxt/client';
-
-const appConfig = useAppConfig();
+import { compatibleWebsiteHostnames } from '@/const';
 
 // LMS全体のスタイルオーバーライド
 export default defineContentScript({
-    matches: appConfig.compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/*`),
+    matches: compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/*`),
     cssInjectionMode: 'manifest',
     main() {
         // do nothing

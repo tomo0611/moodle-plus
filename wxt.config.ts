@@ -1,4 +1,5 @@
 import { defineConfig } from 'wxt';
+import { compatibleWebsiteHostnames } from './src/const';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -14,7 +15,6 @@ export default defineConfig({
     manifestVersion: 3,
     manifest: {
         name: 'Moodle Plus',
-        default_locale: 'ja',
         description: 'Moodleにちょっとした機能を追加します!',
         author: {
             email: 'tomo0611@hotmail.com',
@@ -26,5 +26,9 @@ export default defineConfig({
             128: '/icons/icon128.png',
             240: '/icons/icon240.png',
         },
+        web_accessible_resources: [{
+            resources: ['index-rewrite.js'],
+            matches: compatibleWebsiteHostnames.map((hostname) => `https://${hostname}/*`),
+        }],
     },
 });

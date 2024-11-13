@@ -1,17 +1,13 @@
-import { useAppConfig } from 'wxt/client';
-import { main } from './index_rewrite';
-
-const appConfig = useAppConfig();
+import { compatibleWebsiteHostnames } from '@/const';
 
 export default defineContentScript({
-    matches: appConfig.compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/`), // トップページ
-    main(ctx) {
+    matches: compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/`), // トップページ
+    async main(ctx) {
         function postMessageToInjectedScript(data: PostMessageDataFromExtension[keyof PostMessageDataFromExtension]) {
             console.log('[Moodle Plus] Post message to injected script:', data);
-            //window.postMessage(data, '*');
+            window.postMessage(data, '*');
         }
         
-        /*
         window.addEventListener('message', async (event) => {
             if (event.source !== window) return;
             const data: PostMessageDataFromInjectedScript[keyof PostMessageDataFromInjectedScript] = event.data;
@@ -29,16 +25,10 @@ export default defineContentScript({
                 }
             }
         });
-        */
 
-        const ui = createIntegratedUi(ctx, {
-            position: 'inline',
-            anchor: 'body',
-            onMount() {
-                main();
-            },
+        // IndexのリライトではWindowのセッションキーを使うため、Unlisted Scriptで実行する
+        await injectScript('/index-rewrite.js', {
+            keepInDom: true,
         });
-
-        ui.mount();
     },
 });

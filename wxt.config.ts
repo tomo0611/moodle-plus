@@ -9,7 +9,6 @@ export default defineConfig({
 
     // Config
     extensionApi: 'chrome',
-    modules: ['@wxt-dev/module-vue'],
 
     // Manifest
     manifestVersion: 3,

@@ -4,8 +4,14 @@
   "description": "Moodleにちょっとした機能を追加します!",
   "main": "./src/content_script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "vue-tsc --noEmit",
+    "postinstall": "wxt prepare"
   },
   "repository": {
     "type": "git",
@@ -21,8 +27,14 @@
     "url": "https://github.com/tomo0611/moodle-plus/issues"
   },
   "homepage": "https://github.com/tomo0611/moodle-plus#readme",
+  "dependencies": {
+    "vue": "^3.5.12"
+  },
   "devDependencies": {
-    "@types/chrome": "^0.0.254",
-    "typescript": "^5.3.3"
+    "@types/chrome": "^0.0.280",
+    "@wxt-dev/module-vue": "^1.0.1",
+    "typescript": "^5.6.2",
+    "vue-tsc": "^2.1.10",
+    "wxt": "^0.19.13"
   }
 }

@@ -1,3 +1,14 @@
+import type {
+    MoodleEvent,
+    GetActionEventsByTimesortRes,
+    GetCalendarUpcomingViewRes,
+} from '@/types/moodle';
+import type {
+    ParsedAssignments,
+    PostMessageDataFromExtension,
+    PostMessageDataFromInjectedScript,
+} from '@/types/messages';
+
 export default defineUnlistedScript(() => {
     main();
 });

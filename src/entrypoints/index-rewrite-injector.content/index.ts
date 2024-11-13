@@ -1,4 +1,8 @@
 import { compatibleWebsiteHostnames } from '@/const';
+import type {
+    PostMessageDataFromExtension,
+    PostMessageDataFromInjectedScript,
+} from '@/types/messages';
 
 export default defineContentScript({
     matches: compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/`), // トップページ

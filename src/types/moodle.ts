@@ -1,5 +1,5 @@
 // アイコン情報の型
-interface MoodleIcon {
+export interface MoodleIcon {
     key: string;
     component: string;
     alttext: string;
@@ -8,7 +8,7 @@ interface MoodleIcon {
 }
 
 // コース情報の型
-interface MoodleCourse {
+export interface MoodleCourse {
     id: number;
     fullname: string;
     shortname: string;
@@ -31,7 +31,7 @@ interface MoodleCourse {
     coursecategory: string;
 }
 
-interface MoodleAction {
+export interface MoodleAction {
     actionable: boolean;
     itemcount: number;
     name: string;
@@ -40,7 +40,7 @@ interface MoodleAction {
 }
 
 // イベントの型
-interface MoodleEvent {
+export interface MoodleEvent {
     action?: MoodleAction;
     id: number;
     name: string;
@@ -92,11 +92,11 @@ interface MoodleEvent {
     draggable: boolean;
 }
 
-interface MoodleServiceRes {
+export interface MoodleServiceRes {
     error: boolean;
 }
 
-interface GetActionEventsByTimesortRes extends MoodleServiceRes {
+export interface GetActionEventsByTimesortRes extends MoodleServiceRes {
     data: {
         events: MoodleEvent[];
         firstid: number;
@@ -104,7 +104,7 @@ interface GetActionEventsByTimesortRes extends MoodleServiceRes {
     }
 }
 
-interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
+export interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
     data: {
         categoryid: number;
         courseid: number;
@@ -113,42 +113,5 @@ interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
         events: MoodleEvent[];
         filter_selector: string;
         isloggedin: boolean;
-    }
-}
-
-type ParsedAssignments = {
-    eventId: number;
-    instanceId: number;
-    courseName: string;
-    assignmentTitle: string;
-    moduleName: string;
-    startDate?: number;
-    dueDate: number;
-    url: string;
-    actionAvailable?: boolean;
-    hasSubmitted: boolean | 'unknown';
-};
-
-type PostMessageDataFromExtension = {
-    'moodlePlus:misc:getVersion': {
-        type: 'moodlePlus:misc:getVersion';
-        payload: {
-            version: string;
-        };
-    }
-    'moodlePlus:upcomingAssignments:ignoreAssignments': {
-        type: 'moodlePlus:upcomingAssignments:ignoreAssignments';
-        payload: {
-            instanceIds: number[];
-        };
-    }
-};
-
-type PostMessageDataFromInjectedScript = {
-    'moodlePlus:misc:requestGetVersion': {
-        type: 'moodlePlus:misc:requestGetVersion';
-    }
-    'moodlePlus:misc:injectedScriptLoaded': {
-        type: 'moodlePlus:misc:injectedScriptLoaded';
     }
 }

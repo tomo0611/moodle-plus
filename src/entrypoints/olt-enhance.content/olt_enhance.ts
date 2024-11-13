@@ -1,4 +1,4 @@
-(() => {
+export function main() {
     // オンラインテキストエディタの文字数をカウントするスクリプト
 
     console.log("[Moodle Plus] olt enhance script loaded. Waiting for page load");
@@ -45,4 +45,4 @@
     } else {
         onLoad();
     }
-})();
+}

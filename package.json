@@ -1,8 +1,8 @@
 {
   "name": "moodle-plus",
-  "version": "0.1b",
+  "version": "4.1.0",
+  "type": "module",
   "description": "Moodleにちょっとした機能を追加します!",
-  "main": "./src/content_script.js",
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",

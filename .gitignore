@@ -19,7 +19,6 @@ npm-debug.log*
 *.tsbuildinfo
 
 # wxt
-.output
 stats.html
 stats-*.json
 .wxt

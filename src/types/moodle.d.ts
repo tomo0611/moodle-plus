@@ -94,7 +94,7 @@ interface MoodleEvent {
 
 interface MoodleServiceRes {
     error: boolean;
-};
+}
 
 interface GetActionEventsByTimesortRes extends MoodleServiceRes {
     data: {

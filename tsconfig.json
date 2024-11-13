@@ -1,35 +1,3 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "useDefineForClassFields": true,
-        "module": "ES2022",
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "moduleResolution": "node",
-        "baseUrl": "src",
-        "resolveJsonModule": true,
-        "allowJs": true,
-        "checkJs": true,
-        "removeComments": true,
-        "esModuleInterop": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
-        "skipLibCheck": true
-    },
-    "include": [
-        "src"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "./tsconfig.json"
-    ]
+    "extends": "./.wxt/tsconfig.json"
 }

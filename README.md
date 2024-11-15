@@ -18,9 +18,9 @@ Moodle Plus はオープンソースの教育支援システム「Moodle」に�
 
 ## インストール方法
 
-Chrome: [Chrome のウェブストア](https://chromewebstore.google.com/detail/moodle-plus/nncecmfhijadiddmmnajjaemlpnknplh)からインストール
-Edge: [Microsoft Edge アドオン](https://microsoftedge.microsoft.com/addons/detail/odiokdoddkknajccbiclcbfjpbjijlhc)からインストール
-Firefox: [Firefox のアドオンストア](https://addons.mozilla.org/ja/firefox/addon/moodle-plus/)からインストール
+- Chrome: [Chrome のウェブストア](https://chromewebstore.google.com/detail/moodle-plus/nncecmfhijadiddmmnajjaemlpnknplh)からインストール
+- Edge: [Microsoft Edge アドオン](https://microsoftedge.microsoft.com/addons/detail/odiokdoddkknajccbiclcbfjpbjijlhc)からインストール
+- Firefox: [Firefox のアドオンストア](https://addons.mozilla.org/ja/firefox/addon/moodle-plus/)からインストール
 
 ## 対応状況
 

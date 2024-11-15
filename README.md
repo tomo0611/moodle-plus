@@ -45,13 +45,53 @@ Firefox: [Firefox のアドオンストア](https://addons.mozilla.org/ja/firefo
 
 ## 動かし方 (開発者向け)
 
+### 依存関係のインストール
+
+パッケージマネージャにpnpmを使用しています。
+
+```bash
+pnpm i
+```
+
+### 開発
+
 開発用サーバーを動かすには以下のようにします。
 
 ```bash
-npm run build
+# Chrome系向け
+pnpm dev
+
+# Firefox系向け
+pnpm dev:firefox
 ```
 
+開発モード中はファイルを変更するたびにビルドが行われ、対応する環境では専用のサンドボックス化されたブラウザが起動します。
+
+### ビルド
+
+ビルド成果物を`/dist/<ビルドターゲットによって異なるディレクトリ名>/`に出力します。
+
 Chrome/Edge の「パッケージ化されてない拡張機能を読み込む」を使って読み込んでください。
+
+```bash
+# Chrome系向け
+pnpm build
+
+# Firefox系向け
+pnpm build:firefox
+```
+
+### パッケージング
+
+ビルド成果物をzipファイルにして`/dist`に出力します。
+
+```bash
+# Chrome系向け
+pnpm zip
+
+# Firefox系向け
+pnpm zip:firefox
+```
 
 ## プロジェクトのメンバー
 

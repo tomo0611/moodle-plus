@@ -26,4 +26,7 @@ body:
       options:
         - label: 上記のMoodleで動作確認を行いました。(I have tested the extension at above Moodle URLs)
         - label: 私は大学追加の実装を自分で行い、このリポジトリにPull Requestを送信する予定です。 (I will implement the support for my university by myself and send a pull request to this repository)
-
+  - type: textarea
+    attributes:
+      label: 備考欄 (Remarks)
+      description: その他、なにか伝えたいことがあればこちらに記入してください。

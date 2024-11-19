@@ -4,10 +4,10 @@ import type {
     GetCalendarUpcomingViewRes,
 } from '@/types/moodle';
 import type {
-    ParsedAssignments,
     PostMessageDataFromExtension,
     PostMessageDataFromInjectedScript,
 } from '@/types/messages';
+import type { ParsedAssignments } from '@/types/misc';
 
 export default defineUnlistedScript(() => {
     main();

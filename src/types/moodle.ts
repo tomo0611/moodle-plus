@@ -115,3 +115,12 @@ export interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
         isloggedin: boolean;
     }
 }
+
+export interface MeaQsQuiz {
+    index: number;
+    question: string;
+    choices?: string[][];
+    correct?: string;
+    answer?: string;
+    image?: string;
+}

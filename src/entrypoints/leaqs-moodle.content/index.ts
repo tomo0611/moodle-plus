@@ -91,20 +91,14 @@ export default defineContentScript({
                         const text = [];
                         for (let j = 0; j < choiceChilds.length; j += 1) {
                             const textChild = choiceChilds[j];
-                            if (textChild.nodeType === 1) {
-                                const textNode = (
-                                    textChild as Element
-                                ).getElementsByTagName("p");
+                            if (textChild instanceof HTMLElement) {
+                                const textNode = textChild.getElementsByTagName("p");
                                 if (textNode.length !== 0) {
                                     for (let k = 0; k < textNode.length; k += 1) {
                                         text.push(textNode[k].textContent);
                                     }
                                 } else {
-                                    const textToHtmlElement = (
-                                        textChild as Element
-                                    )?.querySelector(
-                                        ".text_to_html"
-                                    ) as Element | null;
+                                    const textToHtmlElement = textChild.querySelector(".text_to_html");
                                     if (textToHtmlElement) {
                                         const textContent =
                                             textToHtmlElement?.textContent;
@@ -120,7 +114,7 @@ export default defineContentScript({
                                 }
                             }
                         }
-                        quiz.choices.push(text);
+                        quiz.choices.push(text.filter((value) => value !== null));
 
                         // 選択肢問題の正答を取得
                         if (choices.querySelector("strong .text_to_html")) {
@@ -129,10 +123,8 @@ export default defineContentScript({
                             const text = [];
                             for (let j = 0; j < correctChilds.length; j += 1) {
                                 const textChild = correctChilds[j];
-                                if (textChild.nodeType === 1) {
-                                    const textNode = (
-                                        textChild as Element
-                                    ).getElementsByTagName("p");
+                                if (textChild instanceof HTMLElement) {
+                                    const textNode = textChild.getElementsByTagName("p");
                                     if (textNode.length !== 0) {
                                         for (
                                             let k = 0;
@@ -142,11 +134,7 @@ export default defineContentScript({
                                             text.push(textNode[k].textContent);
                                         }
                                     } else {
-                                        const textToHtmlElement = (
-                                            textChild as Element
-                                        )?.querySelector(
-                                            ".text_to_html"
-                                        ) as Element | null;
+                                        const textToHtmlElement = textChild.querySelector(".text_to_html");
                                         if (textToHtmlElement) {
                                             const textContent =
                                                 textToHtmlElement?.textContent;
@@ -163,9 +151,7 @@ export default defineContentScript({
                                     }
                                 }
                             }
-                            quiz.correct = text.filter(
-                                (value) => value !== null
-                            ) as string[];
+                            quiz.correct = text.filter((value) => value !== null);
                         }
                     }
                 }
@@ -190,18 +176,14 @@ export default defineContentScript({
                     const text = [];
                     for (let j = 0; j < answerChilds.length; j += 1) {
                         const textChild = answerChilds[j];
-                        if (textChild.nodeType === 1) {
-                            const textNode = (
-                                textChild as Element
-                            ).getElementsByTagName("p");
+                        if (textChild instanceof HTMLElement) {
+                            const textNode = textChild.getElementsByTagName("p");
                             if (textNode.length !== 0) {
                                 for (let k = 0; k < textNode.length; k += 1) {
                                     text.push(textNode[k].textContent);
                                 }
                             } else {
-                                const textToHtmlElement = (
-                                    textChild as Element
-                                )?.querySelector(".text_to_html") as Element | null;
+                                const textToHtmlElement = textChild.querySelector(".text_to_html");
                                 if (textToHtmlElement) {
                                     const textContent =
                                         textToHtmlElement?.textContent;
@@ -219,7 +201,7 @@ export default defineContentScript({
                     }
                     quiz.answer = text.filter(
                         (value) => value !== null
-                    ) as string[];
+                    );
                 }
 
                 // 画像の抽出
@@ -243,20 +225,15 @@ export default defineContentScript({
                         const text = [];
                         for (let j = 0; j < correctChilds.length; j += 1) {
                             const textChild = correctChilds[j];
-                            if (textChild.nodeType === 1) {
-                                const textNode = (
-                                    textChild as Element
-                                ).querySelectorAll("p");
+
+                            if (textChild instanceof HTMLElement) {
+                                const textNode = textChild.querySelectorAll("p");
                                 if (textNode.length !== 0) {
                                     for (let k = 0; k < textNode.length; k += 1) {
                                         text.push(textNode[k].textContent);
                                     }
                                 } else {
-                                    const textToHtmlElement = (
-                                        textChild as Element
-                                    )?.querySelector(
-                                        ".text_to_html"
-                                    ) as Element | null;
+                                    const textToHtmlElement = textChild.querySelector(".text_to_html");
                                     if (textToHtmlElement) {
                                         const textContent =
                                             textToHtmlElement?.textContent;
@@ -274,27 +251,21 @@ export default defineContentScript({
                         }
                         quiz.correct = text.filter(
                             (value) => value !== null
-                        ) as string[];
+                        );
                     }
                     if (answerElements[2]) {
                         const answerChilds = answerElements[2].childNodes;
                         const text = [];
                         for (let j = 0; j < answerChilds.length; j += 1) {
                             const textChild = answerChilds[j];
-                            if (textChild.nodeType === 1) {
-                                const textNode = (
-                                    textChild as Element
-                                ).querySelectorAll("p");
+                            if (textChild instanceof HTMLElement) {
+                                const textNode = textChild.querySelectorAll("p");
                                 if (textNode.length !== 0) {
                                     for (let k = 0; k < textNode.length; k += 1) {
                                         text.push(textNode[k].textContent);
                                     }
                                 } else {
-                                    const textToHtmlElement = (
-                                        textChild as Element
-                                    )?.querySelector(
-                                        ".text_to_html"
-                                    ) as Element | null;
+                                    const textToHtmlElement = textChild.querySelector(".text_to_html");
                                     if (textToHtmlElement) {
                                         const textContent =
                                             textToHtmlElement?.textContent;
@@ -310,9 +281,7 @@ export default defineContentScript({
                                 }
                             }
                         }
-                        quiz.answer = text.filter(
-                            (value) => value !== null
-                        ) as string[];
+                        quiz.answer = text.filter((value) => value !== null);
                     }
                 }
 

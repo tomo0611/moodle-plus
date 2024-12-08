@@ -17,7 +17,7 @@ export function leaqsBackground() {
         sectionName: string
     ) {
         try {
-            const tab = await chrome.tabs.create({ url: "leaQs.html" });
+            const tab = await chrome.tabs.create({ url: "leaqs.html" });
             const classAndSection = className + "/ " + sectionName;
             chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
                 if (tabId === tab.id && info.status === "complete") {

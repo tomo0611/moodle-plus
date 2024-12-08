@@ -19,3 +19,9 @@
 #upcoming_assignments .spinner-border-sm {
     border-width: .15em !important;
 }
+
+/* オンラインテキスト */
+.editor_atto_notification .atto_info {
+    margin-top: .5em;
+    border-radius: .5em!important;
+}

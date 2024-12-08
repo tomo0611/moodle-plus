@@ -117,11 +117,11 @@ export interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
 }
 
 // meaQsの型
-interface MeaQsQuiz {
+export interface MeaQsQuiz {
     index: number;
-    question: string[];
-    choices?: string[];
-    correct?: string[];
-    answer?: string[];
-    image?: string[];
+    question: string;
+    choices?: string[][];
+    correct?: string;
+    answer?: string;
+    image?: string;
 }

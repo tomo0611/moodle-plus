@@ -116,6 +116,17 @@ interface GetCalendarUpcomingViewRes extends MoodleServiceRes {
     }
 }
 
+// meaQsの型
+interface MeaQsQuiz {
+    index: number;
+    question: string[];
+    choices?: string[[]];
+    correct?: string[];
+    answer?: string[];
+    image?: string[];
+}
+
+
 type ParsedAssignments = {
     eventId: number;
     instanceId: number;
@@ -152,3 +163,4 @@ type PostMessageDataFromInjectedScript = {
         type: 'moodlePlus:misc:injectedScriptLoaded';
     }
 }
+

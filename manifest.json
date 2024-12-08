@@ -22,7 +22,8 @@
                 "https://cms.aitech.ac.jp/*"
             ],
             "js": [
-                "./dist/content_script_injector.js"
+                "./dist/content_script_injector.js",
+                "./dist/leaQs_contents.js"
             ],
             "css": [
                 "./styles/main.css"
@@ -44,5 +45,8 @@
                 "https://cms.aitech.ac.jp/*"
             ]
         }
-    ]
+    ],
+    "background": {
+        "service_worker": "dist/background.js"
+    }
 }

@@ -22,8 +22,13 @@ body:
   - type: checkboxes
     attributes:
       label: 以下に当てはまる場合はチェックしてください。
-      description: 項目はすべて任意です。当てはまる場合のみチェックしてください。
+      description: |
+        項目はすべて任意です。当てはまる場合のみチェックしてください。
+        ※未対応のMoodleでMoodle Plusの動作確認をするには、開発環境を構築する必要があります。拡張機能ストアでダウンロードできるものは、現状対応しているMoodleサイト以外では動作しません。
       options:
         - label: 上記のMoodleで動作確認を行いました。(I have tested the extension at above Moodle URLs)
         - label: 私は大学追加の実装を自分で行い、このリポジトリにPull Requestを送信する予定です。 (I will implement the support for my university by myself and send a pull request to this repository)
-
+  - type: textarea
+    attributes:
+      label: 備考欄 (Remarks)
+      description: その他、なにか伝えたいことがあればこちらに記入してください。

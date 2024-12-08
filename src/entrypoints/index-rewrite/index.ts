@@ -474,7 +474,10 @@ async function showUpcomingAsignments() {
                 }
                 return acc;
             }, [])
-            .filter((event) => event.dueDate > Date.now() || !event.hasSubmitted) // 期限切れの提出済み課題を除外
+            .filter((assignment) => (
+                (assignment.startDate == null || assignment.dueDate !== assignment.startDate) || // 期限と開始が同じものは除外（おそらく開始イベントしか存在しなかったやつ）
+                (assignment.dueDate > Date.now() || !assignment.hasSubmitted) // 期限切れの提出済み課題を除外
+            ))
             .sort((a, b) => a.dueDate - b.dueDate); // 期限が近い順にソート
 
         //#region 描画用の関数定義群

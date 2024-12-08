@@ -17,3 +17,9 @@ npm-debug.log*
 
 # typescript
 *.tsbuildinfo
+
+# wxt
+stats.html
+stats-*.json
+.wxt
+web-ext.config.ts

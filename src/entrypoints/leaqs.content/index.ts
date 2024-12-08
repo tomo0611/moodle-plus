@@ -120,7 +120,7 @@ export default defineContentScript({
                                 }
                             }
                         }
-                        quiz.choices.push(text);
+                        quiz.choices.push(text.filter((value) => value !== null));
 
                         // 選択肢問題の正答を取得
                         if (choices.querySelector("strong .text_to_html")) {

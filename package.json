@@ -1,6 +1,6 @@
 {
   "name": "moodle-plus",
-  "version": "5.0",
+  "version": "5.1",
   "type": "module",
   "description": "Moodleにちょっとした機能を追加します!",
   "scripts": {

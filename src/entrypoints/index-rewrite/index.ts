@@ -1,3 +1,4 @@
+import { experimentalCompatibleWebsiteHostnames } from '@/const';
 import type {
     MoodleEvent,
     GetActionEventsByTimesortRes,
@@ -105,6 +106,13 @@ async function changeTitle() {
             subtitle.innerHTML = `Developed by <a href="https://tomo0611.jp/" target="_blank">tomo0611</a> (大阪公立大学 工学部 情報工)</br>
             バグなどの報告は<a href="https://github.com/tomo0611/moodle-plus" target="_blank">こちら</a>までお願いします。`;
             title.parentElement?.insertBefore(subtitle, title.nextElementSibling);
+
+            if (experimentalCompatibleWebsiteHostnames.includes(window.location.hostname)) {
+                const warning = document.createElement("div");
+                warning.innerText = `Moodle Plus はこの Moodle (${window.location.hostname}) には試験的に対応しています。動作確認が不十分なため、一部の機能が使用できなかったり、Moodle の操作に支障をきたしたりする可能性があります。使用中に問題が発生した場合は Moodle Plus を無効化してください。`
+                warning.className = "alert alert-warning mx-3 mb-4";
+                document.getElementById('page-content')?.parentElement?.insertBefore(warning, document.getElementById('page-content'));
+            }
         }
     } catch (e) {
         console.log("[Moodle Plus] Title Format is not as expected");

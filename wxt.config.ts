@@ -32,6 +32,12 @@ export default defineConfig({
         if (browser === 'firefox') {
             // @ts-expect-error Chromeの型を使っているので異なる
             manifest.author = 'tomo0611';
+            manifest.browser_specific_settings = {
+                gecko: {
+                    id: 'moodleplus@tomo0611',
+                    strict_min_version: '109.0',
+                },
+            };
         } else {
             manifest.author = {
                 email: 'tomo0611@hotmail.com',

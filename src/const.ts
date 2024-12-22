@@ -6,14 +6,13 @@ export const stableCompatibleWebsiteHostnames = [
     "sulms.shiga-u.ac.jp",
     "mdl.media.gunma-u.ac.jp",
     "cms.aitech.ac.jp",
+    "wsdmoodle.waseda.jp",
 ];
 
 /** 試験対応しているMoodleのホスト名（警告が表示される） */
 export const experimentalCompatibleWebsiteHostnames = [
     // 試験対応 (Issue #25)
     "lms-m41.mie-u.ac.jp",
-    // 試験対応 (Issue #16)
-    "wsdmoodle.waseda.jp",
 ];
 
 /** 対応しているMoodleのホスト名 */

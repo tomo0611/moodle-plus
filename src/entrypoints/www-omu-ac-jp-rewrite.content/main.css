@@ -1,0 +1,18 @@
+.__moodle_plus__omub {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: var(--theme);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.__moodle_plus__omub:hover {
+    background-color: hsl(from var(--theme) h s calc(l + 10));
+    color: #fff;
+    opacity: 1;
+}

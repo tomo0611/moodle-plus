@@ -1,7 +1,7 @@
 import type { MeaQsQuiz } from "@/types/moodle";
 
 export function leaqsBackground() {
-    chrome.runtime.onMessage.addListener((request) => {
+    browser.runtime.onMessage.addListener((request) => {
         if (request.action === "formatAndDisplayQuiz") {
             formatAndDisplayQuiz(
                 request.quizData,
@@ -17,12 +17,12 @@ export function leaqsBackground() {
         sectionName: string
     ) {
         try {
-            const tab = await chrome.tabs.create({ url: "leaqs.html" });
+            const tab = await browser.tabs.create({ url: "leaqs.html" });
             const classAndSection = className + "/ " + sectionName;
-            chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+            browser.tabs.onUpdated.addListener(function listener(tabId, info) {
                 if (tabId === tab.id && info.status === "complete") {
-                    chrome.tabs.onUpdated.removeListener(listener);
-                    chrome.tabs.sendMessage(tabId, {
+                    browser.tabs.onUpdated.removeListener(listener);
+                    browser.tabs.sendMessage(tabId, {
                         action: "displaySummary",
                         quizData: quizData,
                         classAndSection: classAndSection,

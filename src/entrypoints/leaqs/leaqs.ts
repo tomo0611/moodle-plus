@@ -1,6 +1,6 @@
 import type { MeaQsQuiz } from "@/types/moodle";
 
-chrome.runtime.onMessage.addListener((request) => {
+browser.runtime.onMessage.addListener((request) => {
     if (request.action === "displaySummary") {
         displaySummary(request.quizData, request.classAndSection);
     }

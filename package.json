@@ -29,8 +29,7 @@
   "homepage": "https://github.com/tomo0611/moodle-plus#readme",
   "packageManager": "pnpm@9.3.0",
   "devDependencies": {
-    "@types/chrome": "^0.0.287",
-    "typescript": "^5.7.2",
-    "wxt": "^0.19.19"
+    "typescript": "^5.8.3",
+    "wxt": "^0.20.6"
   }
 }

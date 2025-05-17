@@ -39,7 +39,7 @@ export default defineContentScript({
                     const className = pageNavbar?.querySelector("a")?.title ?? "";
                     const sectionName =
                         pageNavbar?.querySelector("span")?.textContent ?? "";
-                    chrome.runtime.sendMessage({
+                    browser.runtime.sendMessage({
                         action: "formatAndDisplayQuiz",
                         quizData: quizData,
                         className: className,

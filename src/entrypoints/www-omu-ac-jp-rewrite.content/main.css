@@ -16,3 +16,14 @@
     color: #fff;
     opacity: 1;
 }
+
+.__moodle_plus__omub::before {
+    content: '※Moodle Plusが追加したリンクです';
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+}

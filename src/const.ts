@@ -16,6 +16,8 @@ export const experimentalCompatibleWebsiteHostnames = [
     // 試験対応 (Issue #45)
     "ict-i.el.kyutech.ac.jp",
     "ict-t.el.kyutech.ac.jp",
+    // 試験対応 (Issue #42)
+    "online.ouj.ac.jp",
 ];
 
 /** 対応しているMoodleのホスト名 */

@@ -13,6 +13,8 @@ export const stableCompatibleWebsiteHostnames = [
 export const experimentalCompatibleWebsiteHostnames = [
     // 試験対応 (Issue #25)
     "lms-m41.mie-u.ac.jp",
+    // 試験対応 (Issue #42)
+    "online.ouj.ac.jp",
 ];
 
 /** 対応しているMoodleのホスト名 */

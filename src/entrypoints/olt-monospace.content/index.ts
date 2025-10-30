@@ -17,9 +17,10 @@ export default defineContentScript({
                     return;
                 }
 
+                const pos = textarea.selectionStart ?? 0;
+                const posEnd = textarea.selectionEnd ?? textarea.value.length;
+
                 if (ev.code === 'Enter') {
-                    const pos = textarea.selectionStart ?? 0;
-                    const posEnd = textarea.selectionEnd ?? textarea.value.length;
                     if (pos === posEnd) {
                         const lines = textarea.value.slice(0, pos).split('\n');
                         const currentLine = lines[lines.length - 1];
@@ -32,11 +33,29 @@ export default defineContentScript({
                 }
 
                 if (ev.code === 'Tab') {
-                    const pos = textarea.selectionStart ?? 0;
-                    const posEnd = textarea.selectionEnd ?? textarea.value.length;
-                    textarea.value = textarea.value.slice(0, pos) + '    ' + textarea.value.slice(posEnd);
-                    textarea.setSelectionRange(pos + 4, pos + 4);
                     ev.preventDefault();
+                    const tabText = '    ';
+
+                    // 複数行選択の処理
+                    if (pos !== posEnd && textarea.value.slice(pos, posEnd).includes('\n')) {
+                        const lines = textarea.value.split('\n');
+                        const startLine = textarea.value.slice(0, pos).split('\n').length - 1;
+                        const endsWithNewline = posEnd > pos && textarea.value[posEnd - 1] === '\n';
+                        const endLine = textarea.value.slice(0, posEnd).split('\n').length - 1 - (endsWithNewline ? 1 : 0);
+                        
+                        let totalCharsAdded = 0;
+                        for (let i = startLine; i <= endLine; i++) {
+                            lines[i] = tabText + lines[i];
+                            totalCharsAdded += tabText.length;
+                        }
+
+                        textarea.value = lines.join('\n');
+                        textarea.setSelectionRange(pos + tabText.length, posEnd + totalCharsAdded);
+                    } else {
+                        // 選択なし、または単一行選択
+                        textarea.value = textarea.value.slice(0, pos) + tabText + textarea.value.slice(posEnd);
+                        textarea.setSelectionRange(pos + tabText.length, pos + tabText.length);
+                    }
                 }
             });
         });

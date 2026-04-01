@@ -7,9 +7,6 @@ export default defineConfig({
     srcDir: 'src',
     outDir: 'dist',
 
-    // Config
-    extensionApi: 'chrome',
-
     // Manifest
     manifestVersion: 3,
     manifest: ({ browser }) => {

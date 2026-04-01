@@ -43,6 +43,21 @@ export const sites: SiteConfig[] = [
         hostname: 'wsdmoodle.waseda.jp',
         name: 'Waseda Moodle',
     },
+    {
+        hostname: 'ict-i.el.kyutech.ac.jp',
+        name: '九州工業大学（飯塚）',
+        experimental: true,
+    },
+    {
+        hostname: 'ict-t.el.kyutech.ac.jp',
+        name: '九州工業大学（戸畑・若松）',
+        experimental: true,
+    },
+    {
+        hostname: 'online.ouj.ac.jp',
+        name: '放送大学オンライン授業',
+        experimental: true,
+    },
 ];
 
 /** 対応しているMoodleのホスト名 */

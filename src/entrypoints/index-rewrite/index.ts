@@ -109,7 +109,12 @@ async function changeTitle() {
 
             if (currentSite?.experimental) {
                 const warning = document.createElement("div");
-                warning.innerText = `Moodle Plus はこの Moodle (${currentSite.hostname}) には試験的に対応しています。動作確認が不十分なため、一部の機能が使用できなかったり、Moodle の操作に支障をきたしたりする可能性があります。使用中に問題が発生した場合は Moodle Plus を無効化してください。`
+                const warningPara1 = document.createElement("p");
+                warningPara1.innerText = `Moodle Plus はこの Moodle (${currentSite.hostname}) には試験的に対応しています。動作確認が不十分なため、一部の機能が使用できなかったり、Moodle の操作に支障をきたしたりする可能性があります。使用中に問題が発生した場合は Moodle Plus を無効化してください。`;
+                const warningPara2 = document.createElement("p");
+                warningPara2.innerHTML = `<a href="https://github.com/tomo0611/moodle-plus/issues?q=is%3Aissue%20state%3Aopen%20label%3A%E7%A2%BA%E8%AA%8D%E5%BE%85%E3%81%A1">このリストに記載のMoodle</a>での動作報告を募集しています！GitHubアカウントをお持ちの方は、ぜひご協力をお願いします。`;
+                warning.appendChild(warningPara1);
+                warning.appendChild(warningPara2);
                 warning.className = "alert alert-warning mx-3 mb-4";
                 document.getElementById('page-content')?.parentElement?.insertBefore(warning, document.getElementById('page-content'));
             }

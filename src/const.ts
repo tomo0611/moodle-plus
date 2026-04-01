@@ -75,6 +75,12 @@ export const sites: SiteConfig[] = [
         name: '青山学院大学',
         experimental: true,
     },
+    {
+        hostname: 'moodle.kochi-u.ac.jp',
+        basePath: '/2026',
+        name: '高知大学（2026年度版）',
+        experimental: true,
+    }
 ];
 
 /** 対応しているMoodleのホスト名 */

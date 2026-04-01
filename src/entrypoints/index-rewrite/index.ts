@@ -19,10 +19,7 @@ function main() {
     console.log("[Moodle Plus] content script script loaded");
     console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());
 
-    if (currentSite != null && (
-        currentSite.hostname === window.location.hostname &&
-        (currentSite.basePath == null || window.location.pathname.replace(/\/$/, '') === currentSite.basePath)
-    ) && isLoggedin()) {
+    if (currentSite != null && isLoggedin()) {
         changeTitle();
         minimizeNewsFeed();
         showUpcomingAsignments();

@@ -42,6 +42,7 @@ export const sites: SiteConfig[] = [
     {
         hostname: 'wsdmoodle.waseda.jp',
         name: 'Waseda Moodle',
+        experimental: true,
     },
     {
         hostname: 'ict-i.el.kyutech.ac.jp',

@@ -80,7 +80,13 @@ export const sites: SiteConfig[] = [
         basePath: '/2026',
         name: '高知大学（2026年度版）',
         experimental: true,
-    }
+    },
+    {
+        hostname: 'moodle2026.wakayama-u.ac.jp',
+        basePath: '/2026',
+        name: '和歌山大学（2026年度版）',
+        experimental: true,
+    },
 ];
 
 /** 対応しているMoodleのホスト名 */

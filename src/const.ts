@@ -70,6 +70,11 @@ export const sites: SiteConfig[] = [
         name: '放送大学オンライン授業',
         experimental: true,
     },
+    {
+        hostname: 'agulms45.aim.aoyama.ac.jp',
+        name: '青山学院大学',
+        experimental: true,
+    },
 ];
 
 /** 対応しているMoodleのホスト名 */

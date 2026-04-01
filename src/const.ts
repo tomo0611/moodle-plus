@@ -45,12 +45,24 @@ export const sites: SiteConfig[] = [
     },
     {
         hostname: 'ict-i.el.kyutech.ac.jp',
-        name: '九州工業大学（飯塚）',
+        name: '九州工業大学（飯塚, v4.1）',
         experimental: true,
     },
     {
         hostname: 'ict-t.el.kyutech.ac.jp',
-        name: '九州工業大学（戸畑・若松）',
+        name: '九州工業大学（戸畑・若松, v4.1）',
+        experimental: true,
+    },
+    {
+        hostname: 'im10.el.kyutech.ac.jp',
+        basePath: '/2026',
+        name: '九州工業大学（飯塚, v4.5）',
+        experimental: true,
+    },
+    {
+        hostname: 'tm10.el.kyutech.ac.jp',
+        basePath: '/2026',
+        name: '九州工業大学（戸畑・若松, v4.5）',
         experimental: true,
     },
     {

@@ -27,9 +27,9 @@
     "url": "https://github.com/tomo0611/moodle-plus/issues"
   },
   "homepage": "https://github.com/tomo0611/moodle-plus#readme",
-  "packageManager": "pnpm@9.3.0",
+  "packageManager": "pnpm@10.33.0",
   "devDependencies": {
-    "typescript": "^5.9.2",
-    "wxt": "^0.20.7"
+    "typescript": "^6.0.2",
+    "wxt": "^0.20.20"
   }
 }

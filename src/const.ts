@@ -87,6 +87,11 @@ export const sites: SiteConfig[] = [
         name: '和歌山大学（2026年度版）',
         experimental: true,
     },
+    {
+        hostname: 'blend.el-kait.jp',
+        name: 'KAIT Moodle（神奈川工科大学）',
+        experimental: true,
+    },
 ];
 
 /** 対応しているMoodleのホスト名 */

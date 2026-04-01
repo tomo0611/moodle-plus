@@ -1,8 +1,9 @@
-import { compatibleWebsiteHostnames } from '@/const';
+import { sites } from '@/const';
 import type { MeaQsQuiz } from '@/types/moodle';
 
 export default defineContentScript({
-    matches: compatibleWebsiteHostnames.map((hostname) => `*://${hostname}/mod/meaqs/student/appraisals.php*`),
+    matches: sites.map((site) => `*://${site.hostname}${site.basePath ?? ''}/mod/meaqs/student/appraisals.php*`),
+    allFrames: true,
     main() {
         createLeaQsPDFButton();
 

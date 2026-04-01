@@ -1,4 +1,4 @@
-import { experimentalCompatibleWebsiteHostnames } from '@/const';
+import { currentSite } from '@/current-site';
 import type {
     MoodleEvent,
     GetActionEventsByTimesortRes,
@@ -19,7 +19,7 @@ function main() {
     console.log("[Moodle Plus] content script script loaded");
     console.log("[Moodle Plus] UserStatus: logged in : " + isLoggedin());
 
-    if (window.location.pathname === "/" && isLoggedin()) {
+    if (currentSite != null && isLoggedin()) {
         changeTitle();
         minimizeNewsFeed();
         showUpcomingAsignments();
@@ -94,7 +94,7 @@ async function changeTitle() {
             title = document.getElementsByClassName("page-header-headings")[0].getElementsByTagName("h1")[0];
         }
         if (title) {
-            title.classList.add('pr-2');
+            title.classList.add('pr-2', 'mb-2');
             const versionRes = await makeRequestToExtension({
                 type: 'moodlePlus:misc:requestGetVersion',
             }, 'moodlePlus:misc:getVersion').catch((_) => {});
@@ -107,9 +107,14 @@ async function changeTitle() {
             バグなどの報告は<a href="https://github.com/tomo0611/moodle-plus" target="_blank">こちら</a>までお願いします。`;
             title.parentElement?.insertBefore(subtitle, title.nextElementSibling);
 
-            if (experimentalCompatibleWebsiteHostnames.includes(window.location.hostname)) {
+            if (currentSite?.experimental) {
                 const warning = document.createElement("div");
-                warning.innerText = `Moodle Plus はこの Moodle (${window.location.hostname}) には試験的に対応しています。動作確認が不十分なため、一部の機能が使用できなかったり、Moodle の操作に支障をきたしたりする可能性があります。使用中に問題が発生した場合は Moodle Plus を無効化してください。`
+                const warningPara1 = document.createElement("p");
+                warningPara1.innerText = `Moodle Plus はこの Moodle (${currentSite.hostname}) には試験的に対応しています。動作確認が不十分なため、一部の機能が使用できなかったり、Moodle の操作に支障をきたしたりする可能性があります。使用中に問題が発生した場合は Moodle Plus を無効化してください。`;
+                const warningPara2 = document.createElement("p");
+                warningPara2.innerHTML = `<a href="https://github.com/tomo0611/moodle-plus/issues?q=is%3Aissue%20state%3Aopen%20label%3A%E7%A2%BA%E8%AA%8D%E5%BE%85%E3%81%A1">このリストに記載のMoodle</a>での動作報告を募集しています！GitHubアカウントをお持ちの方は、ぜひご協力をお願いします。`;
+                warning.appendChild(warningPara1);
+                warning.appendChild(warningPara2);
                 warning.className = "alert alert-warning mx-3 mb-4";
                 document.getElementById('page-content')?.parentElement?.insertBefore(warning, document.getElementById('page-content'));
             }
@@ -279,7 +284,7 @@ async function showUpcomingAsignments() {
         newNode.innerHTML = `<h3>☆そろそろ提出せなあかん課題</h3>`;
         newNode.innerHTML += `<p>現在の時刻：<span id="realtime_clock"></span> (※注意:ズレがある場合があります)</p>`;
         newNode.innerHTML += `※アンケートに答えてから表示される課題などはアンケートに答えるまで表示されません。`;
-        newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="/calendar/view.php?view=upcoming">詳しく見る</a></div>`;
+        newNode.innerHTML += `<div style="display:block;text-align:end;"><a href="${currentSite?.basePath ?? ''}/calendar/view.php?view=upcoming">詳しく見る</a></div>`;
         newNode.innerHTML += '<div id="moodle_plus_upcoming_assignments_fetch_error" class="alert alert-danger d-none my-3"><span></span></div>';
         newNode.innerHTML += `<div id="upcoming_assignments">
 <div class="card my-2 py-6 text-center" id="hide_on_load">
@@ -382,7 +387,7 @@ async function showUpcomingAsignments() {
          * 
          * ので両方fetch
          */
-        const upcomingAssignmentsRes = await fetch(`https://${window.location.host}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_action_events_by_timesort,core_calendar_get_calendar_upcoming_view`, {
+        const upcomingAssignmentsRes = await fetch(`https://${currentSite!.hostname}${currentSite?.basePath ?? ''}/lib/ajax/service.php?sesskey=${sessionKey}&info=core_calendar_get_action_events_by_timesort,core_calendar_get_calendar_upcoming_view`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

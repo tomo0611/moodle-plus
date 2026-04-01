@@ -1,12 +1,13 @@
-import { compatibleWebsiteHostnames } from '@/const';
+import { sites } from '@/const';
 import { main as oltEnhance } from './olt_enhance';
 
 export default defineContentScript({
-    matches: compatibleWebsiteHostnames.flatMap((hostname) => [
-        `*://${hostname}/mod/assign/view.php*`,
-        `*://${hostname}/mod/questionnaire/view.php*`,
-        `*://${hostname}/mod/feedback/complete.php*`,
+    matches: sites.flatMap((site) => [
+        `*://${site.hostname}${site.basePath ?? ''}/mod/assign/view.php*`,
+        `*://${site.hostname}${site.basePath ?? ''}/mod/questionnaire/view.php*`,
+        `*://${site.hostname}${site.basePath ?? ''}/mod/feedback/complete.php*`,
     ]),
+    allFrames: true,
     main() {
         oltEnhance();
     },

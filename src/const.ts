@@ -73,7 +73,6 @@ export const sites: SiteConfig[] = [
     {
         hostname: 'agulms45.aim.aoyama.ac.jp',
         name: '青山学院大学',
-        experimental: true,
     },
     {
         hostname: 'moodle.kochi-u.ac.jp',

@@ -91,6 +91,11 @@ export const sites: SiteConfig[] = [
         name: 'KAIT Moodle（神奈川工科大学）',
         experimental: true,
     },
+    {
+        hostname: 'moodle.kyoai.ac.jp',
+        name: '共愛学園前橋国際大学',
+        experimental: true,
+    },
 ];
 
 /** 対応しているMoodleのホスト名 */

@@ -94,7 +94,6 @@ export const sites: SiteConfig[] = [
     {
         hostname: 'moodle.kyoai.ac.jp',
         name: '共愛学園前橋国際大学',
-        experimental: true,
     },
 ];
 

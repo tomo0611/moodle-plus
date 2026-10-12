@@ -40,9 +40,10 @@ function displaySummary(quizData: MeaQsQuiz[], classAndSection: string) {
 
         if (quiz.image) {
             for (let i = 0; i < quiz.image.length; i++) {
-                if (i <= quiz.question.length + 1) {
+                const imageSrc = quiz.image[i];
+                if (i <= quiz.question.length + 1 && imageSrc != null) {
                     const imageElement = document.createElement("img");
-                    imageElement.src = quiz.image[i];
+                    imageElement.src = imageSrc;
                     imageElement.alt = `問題の画像 #${i + 1} `;
                     quizElement.appendChild(imageElement);
                 }

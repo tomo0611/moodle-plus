@@ -17,7 +17,6 @@ export const sites: SiteConfig[] = [
     {
         hostname: 'lms.omu.moe',
         name: '大阪公立大学 - 臨時Moodle',
-        experimental: true,
     },
     {
         hostname: 'moodle.s.kyushu-u.ac.jp',
